@@ -1,0 +1,1255 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Barakah Time Box</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* Layout: sky band header that follows the prayer segment of the day, tab rail, then a card grid. Timeline is the centre of the planner. */
+:root{
+  --bg:#f3f5fb; --surface:#ffffff; --surface-2:#f7f8fd; --ink:#141833; --muted:#5d6385; --line:#e2e5f1;
+  --creed:#0f9d76; --craft:#7c4dff; --commerce:#e39b06; --care:#e8437f; --contrib:#0a95d6;
+  --gold:#d99a00; --indigo:#4338ca; --good:#12a150; --warn:#e08a00; --bad:#e0413a;
+  --sacred-a:#0f766e; --sacred-b:#14b8a6; --sacred-ink:#ffffff;
+  --chip:#eef0fa; --shadow:0 1px 2px rgba(20,24,51,.06),0 8px 24px rgba(20,24,51,.06);
+  --f-display:"Sora",ui-sans-serif,system-ui,sans-serif; --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; --f-ar:"Amiri","Geeza Pro","Traditional Arabic",serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1022; --surface:#161a33; --surface-2:#1b2040; --ink:#eef0ff; --muted:#a2a8cc; --line:#2a3058;
+  --creed:#2dd4a7; --craft:#a78bfa; --commerce:#fbbf24; --care:#f472b6; --contrib:#38bdf8;
+  --gold:#fbbf24; --indigo:#818cf8; --good:#34d399; --warn:#fbbf24; --bad:#f87171;
+  --sacred-a:#0f766e; --sacred-b:#0d9488; --chip:#232a52; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1022; --surface:#161a33; --surface-2:#1b2040; --ink:#eef0ff; --muted:#a2a8cc; --line:#2a3058;
+  --creed:#2dd4a7; --craft:#a78bfa; --commerce:#fbbf24; --care:#f472b6; --contrib:#38bdf8;
+  --gold:#fbbf24; --indigo:#818cf8; --good:#34d399; --warn:#fbbf24; --bad:#f87171;
+  --sacred-a:#0f766e; --sacred-b:#0d9488; --chip:#232a52; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--sky-a,#1e1b4b)}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h2{font-size:1.15rem} h3{font-size:.98rem}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.ar{font-family:var(--f-ar);font-size:1.15em;direction:rtl}
+.wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Sky band */
+.sky{background:linear-gradient(120deg,var(--sky-a,#1e1b4b),var(--sky-b,#4338ca) 60%,var(--sky-c,#7c3aed));color:#fff;position:relative;overflow:hidden;transition:background .8s}
+.sky::after{content:"";position:absolute;inset:0;background:radial-gradient(600px 200px at 85% -20%,rgba(255,255,255,.28),transparent 70%);pointer-events:none}
+.sky .wrap{padding-block:16px 0;position:relative;z-index:1}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.18);display:grid;place-items:center;border:1px solid rgba(255,255,255,.3)}
+.brand h1{font-size:1.18rem;font-weight:800}
+.brand small{display:block;opacity:.85;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase}
+.datebar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.glass{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:10px;padding:6px 10px}
+button.glass:hover{background:rgba(255,255,255,.26)}
+.datebar .date{min-width:0;text-align:center;padding:4px 12px}
+.datebar .date b{display:block;font-family:var(--f-display);font-size:.98rem}
+.datebar .date span{font-size:.78rem;opacity:.9}
+.next-pill{display:flex;align-items:center;gap:10px;padding:6px 12px}
+.next-pill .ar{font-size:1.25rem}
+.next-pill b{font-family:var(--f-display)}
+.tabs{display:flex;gap:4px;margin-top:14px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{color:#fff;text-decoration:none;padding:10px 14px;border-radius:12px 12px 0 0;font-weight:600;white-space:nowrap;opacity:.82;font-size:.92rem}
+.tabs a:hover{opacity:1;background:rgba(255,255,255,.1)}
+.tabs a[aria-current="page"]{background:var(--bg);color:var(--ink);opacity:1}
+
+main.wrap{padding-block:20px 60px}
+.banner{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between;background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 16%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line));border-radius:var(--r);padding:10px 14px;margin-bottom:16px}
+.banner p{margin:0}
+.grid{display:grid;gap:16px}
+.g-dash{grid-template-columns:repeat(12,minmax(0,1fr))}
+.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}
+@media (max-width:1000px){.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.eyebrow{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.muted{color:var(--muted)}
+.btn{text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 12px;font-weight:600;font-size:.88rem}
+.btn:hover{border-color:var(--indigo)}
+.btn.primary{background:linear-gradient(135deg,var(--indigo),#7c3aed);border-color:transparent;color:#fff}
+.btn.gold{background:linear-gradient(135deg,#f5b301,#f08a24);border-color:transparent;color:#2a1a00}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.btn.sm{padding:4px 8px;font-size:.8rem;border-radius:8px}
+.btn svg{width:16px;height:16px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:.74rem;font-weight:600;background:var(--chip);white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.p-creed{--pc:var(--creed)}.p-craft{--pc:var(--craft)}.p-commerce{--pc:var(--commerce)}.p-care{--pc:var(--care)}.p-contrib{--pc:var(--contrib)}
+.pc-dot{background:var(--pc)}
+.pc-chip{background:color-mix(in srgb,var(--pc) 16%,transparent);color:color-mix(in srgb,var(--pc) 75%,var(--ink))}
+input[type=text],input[type=number],input[type=time],select,textarea{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:7px 10px;min-width:0;width:100%}
+textarea{resize:vertical}
+label.f{display:grid;gap:4px;font-size:.82rem;font-weight:600;color:var(--muted)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+
+/* Dashboard hero */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+@media (max-width:620px){.hero{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.ring{position:relative;width:180px;height:180px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .center b{font-family:var(--f-display);font-size:2.8rem;line-height:1}
+.ring .center span{font-size:.78rem;color:var(--muted);font-weight:600}
+.grade{font-family:var(--f-display);font-size:1.4rem;font-weight:800;background:linear-gradient(90deg,var(--creed),var(--contrib),var(--craft));-webkit-background-clip:text;background-clip:text;color:transparent}
+.comps{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:12px}
+.comp{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px}
+.comp .lbl{font-size:.74rem;color:var(--muted);font-weight:600}
+.comp b{font-family:var(--f-display);font-size:1.3rem}
+.bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--c,var(--indigo))}
+
+.next-card{background:linear-gradient(140deg,var(--sacred-a),var(--sacred-b));color:#fff;border:none}
+.next-card .ar{font-size:2.3rem;line-height:1.1}
+.next-card .count{font-family:var(--f-display);font-size:2.2rem;font-weight:800;letter-spacing:-.02em}
+.next-card .muted{color:rgba(255,255,255,.85)}
+.chain{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chain span{padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.18);font-size:.76rem;font-weight:600;display:inline-flex;gap:5px;align-items:center}
+.chain span.ok{background:#fff;color:var(--sacred-a)}
+.chain span.late{background:#fde68a;color:#5b3d00}
+.chain span.miss{background:#fecaca;color:#7f1d1d}
+
+/* checkpoint pipeline */
+.pipeline{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+@media (max-width:900px){.pipeline{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cp{border-radius:12px;border:1px solid var(--line);padding:10px;background:var(--surface-2);position:relative;min-width:0}
+.cp .st{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.cp b{font-family:var(--f-display);display:block;font-size:.92rem}
+.cp.due{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,var(--surface))}
+.cp.due .st{color:var(--warn)}
+.cp.closed{border-color:color-mix(in srgb,var(--good) 50%,var(--line));background:color-mix(in srgb,var(--good) 10%,var(--surface))}
+.cp.closed .st{color:var(--good)}
+.cp.live{border-color:var(--indigo);box-shadow:0 0 0 3px color-mix(in srgb,var(--indigo) 18%,transparent)}
+.cp.live .st{color:var(--indigo)}
+
+.check-list{display:grid;gap:8px}
+.check-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2)}
+.check-item .ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end}
+.col-right .check-item,.narrow .check-item{grid-template-columns:auto minmax(0,1fr)}
+.col-right .check-item .ctl{grid-column:2;justify-content:flex-start}
+@media (max-width:560px){.check-item{grid-template-columns:auto minmax(0,1fr)}.check-item .ctl{grid-column:2;justify-content:flex-start}}
+.check-item .t{font-weight:600;overflow-wrap:anywhere}
+.check-item .s{font-size:.76rem;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:4px 8px;font-size:.78rem;font-weight:700;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on[data-v="done"],.seg button.on[data-v="jamaah"],.seg button.on[data-v="ontime"]{background:var(--good);color:#fff}
+.seg button.on[data-v="partial"],.seg button.on[data-v="late"],.seg button.on[data-v="qada"]{background:var(--warn);color:#fff}
+.seg button.on[data-v="missed"]{background:var(--bad);color:#fff}
+.stars{display:inline-flex;gap:1px}
+.stars button{border:0;background:none;padding:0 1px;color:var(--line);font-size:1rem;line-height:1}
+.stars button.on{color:var(--gold)}
+.status-ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:.8rem;background:var(--muted)}
+.status-ic.done{background:var(--good)}.status-ic.partial{background:var(--warn)}.status-ic.missed{background:var(--bad)}.status-ic.pending{background:color-mix(in srgb,var(--muted) 45%,var(--line))}
+
+/* planner */
+.planner{display:grid;grid-template-columns:300px minmax(0,1fr) 320px;gap:16px;align-items:start}
+@media (max-width:1180px){.planner{grid-template-columns:minmax(0,1fr) 320px}.planner .col-left{grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;align-items:start}}
+@media (max-width:820px){.planner{grid-template-columns:minmax(0,1fr)}}
+.col-left,.col-right{display:grid;gap:16px;min-width:0}
+.prio{display:grid;grid-template-columns:auto auto 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.prio .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.8rem;color:#fff;background:linear-gradient(135deg,var(--gold),#f08a24)}
+.dump-item{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:7px 8px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);cursor:grab}
+.dump-item .t{overflow-wrap:anywhere;font-weight:500}
+.dump-item.boxed{opacity:.55}
+.dump-add{display:grid;grid-template-columns:1fr auto;gap:6px;margin-bottom:10px}
+.dump-add .row2{grid-column:1 / -1;display:grid;grid-template-columns:1fr 92px;gap:6px}
+.icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:30px;height:30px;display:inline-grid;place-items:center;color:var(--muted)}
+.icon-btn:hover{color:var(--ink);border-color:var(--indigo)}
+.icon-btn svg{width:15px;height:15px}
+
+.tl-card{padding:0;overflow:hidden}
+.tl-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
+.tl-scroll{max-height:76vh;overflow-y:auto;overflow-x:hidden;position:relative}
+.tl{position:relative;margin:8px 0 16px}
+.tl .hr{position:absolute;left:0;right:0;border-top:1px solid var(--line);height:0}
+.tl .hr.half{border-top-style:dashed;opacity:.6}
+.tl .hr span{position:absolute;left:10px;top:-9px;font-size:.72rem;color:var(--muted);background:var(--surface);padding:0 4px;font-variant-numeric:tabular-nums}
+.tl .lane{position:absolute;left:68px;right:10px;top:0;bottom:0}
+.blk{position:absolute;border-radius:10px;padding:4px 8px;overflow:hidden;font-size:.8rem;line-height:1.25;user-select:none;min-height:20px}
+.blk.sacred{left:0;right:0;background:repeating-linear-gradient(135deg,var(--sacred-a),var(--sacred-a) 10px,color-mix(in srgb,var(--sacred-a) 85%,var(--sacred-b)) 10px,color-mix(in srgb,var(--sacred-a) 85%,var(--sacred-b)) 20px);color:var(--sacred-ink);display:flex;align-items:center;gap:8px;z-index:2;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+.blk.sacred.nafl{background:linear-gradient(135deg,#312e81,#6d28d9);}
+.blk.sacred .ar{font-size:1.05rem}
+.blk.sacred b{font-family:var(--f-display)}
+.blk.sacred .lock{margin-left:auto;opacity:.85;display:flex;align-items:center;gap:4px;font-size:.72rem}
+.blk.box{background:color-mix(in srgb,var(--pc) 18%,var(--surface));border:1px solid color-mix(in srgb,var(--pc) 55%,transparent);border-left:4px solid var(--pc);cursor:grab;z-index:3;touch-action:none}
+.blk.box:hover{box-shadow:0 4px 14px rgba(20,24,51,.18)}
+.blk.box.dragging{opacity:.85;cursor:grabbing;z-index:9;box-shadow:0 10px 30px rgba(20,24,51,.3)}
+.blk.box .bt{font-weight:700;display:flex;gap:6px;align-items:center}
+.blk.box .bt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blk.box .bm{font-size:.72rem;color:var(--muted)}
+.blk.box.done{opacity:.78}.blk.box.done .bt span{text-decoration:line-through}
+.blk.box.missed{border-left-color:var(--bad);opacity:.7}
+.blk.box.conflict{outline:2px dashed var(--bad);outline-offset:1px}
+.blk .tag{font-size:.66rem;font-weight:800;background:var(--bad);color:#fff;border-radius:6px;padding:0 5px}
+.blk .star{color:var(--gold)}
+.marker{position:absolute;left:68px;right:10px;height:0;border-top:2px dotted color-mix(in srgb,var(--craft) 70%,transparent);z-index:1}
+.marker span{position:absolute;right:0;top:-10px;font-size:.68rem;background:var(--surface);color:var(--craft);font-weight:700;padding:0 4px}
+.nowline{position:absolute;left:58px;right:0;height:0;border-top:2px solid var(--bad);z-index:8}
+.nowline::before{content:"";position:absolute;left:-5px;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--bad)}
+.tl.drop-hover{background:color-mix(in srgb,var(--indigo) 6%,transparent)}
+
+/* salah page */
+.prayer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.pcard{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface-2);display:grid;gap:8px}
+.pcard.now{border-color:var(--sacred-b);box-shadow:0 0 0 3px color-mix(in srgb,var(--sacred-b) 25%,transparent)}
+.pcard .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pcard .ar{font-size:1.6rem;color:var(--creed)}
+.pcard .time{font-family:var(--f-display);font-size:1.5rem;font-weight:700}
+.week{width:100%;border-collapse:collapse;font-size:.84rem}
+.week th,.week td{padding:6px;text-align:center;border-bottom:1px solid var(--line)}
+.week th:first-child,.week td:first-child{text-align:left}
+.pd{width:16px;height:16px;border-radius:5px;display:inline-block;background:var(--line)}
+.pd.jamaah{background:var(--creed)}.pd.ontime{background:var(--good)}.pd.late{background:var(--warn)}.pd.qada{background:color-mix(in srgb,var(--warn) 55%,var(--bad))}.pd.missed{background:var(--bad)}
+.tablewrap{overflow-x:auto}
+
+/* model page */
+.thesis{background:linear-gradient(130deg,#0b3b3a,#134e4a 40%,#4c1d95);color:#fff;border:none;padding:28px}
+.thesis h2{font-size:clamp(1.4rem,3vw,2.2rem);max-width:24ch}
+.thesis p{max-width:64ch;opacity:.92}
+.thesis .q{border-left:3px solid #fbbf24;padding-left:12px;margin-top:14px;font-size:.95rem}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:stretch}
+@media (max-width:760px){.flow{grid-template-columns:1fr}}
+.flow .st{border-radius:14px;padding:14px;color:#fff;position:relative}
+.flow .st b{font-family:var(--f-display);font-size:1.1rem;display:block}
+.flow .st small{opacity:.9}
+.foundation{margin-top:10px;border-radius:14px;padding:12px 14px;background:linear-gradient(90deg,var(--care),color-mix(in srgb,var(--care) 60%,var(--craft)));color:#fff}
+.cmp{width:100%;border-collapse:separate;border-spacing:0;font-size:.9rem}
+.cmp th{text-align:left;padding:10px;font-family:var(--f-display)}
+.cmp td{padding:10px;border-top:1px solid var(--line);vertical-align:top}
+.cmp td:first-child{color:var(--muted)}
+.cmp td:last-child{font-weight:600}
+.imp{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.imp .card{box-shadow:none;border-top:4px solid var(--pc)}
+.imp .src{font-size:.76rem;color:var(--muted);margin-top:6px}
+.align-row{display:grid;grid-template-columns:150px 1fr 44px;gap:10px;align-items:center;margin-bottom:8px}
+.conduct{display:grid;gap:8px}
+.conduct label{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+
+/* modal */
+.modal-back{position:fixed;inset:0;background:rgba(10,12,30,.55);display:grid;place-items:center;z-index:50;padding:16px}
+.modal{background:var(--surface);border-radius:18px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:20px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.modal h2{margin-bottom:12px}
+.pillar-pick{display:flex;gap:6px;flex-wrap:wrap}
+.pillar-pick button{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 10px;font-weight:600;font-size:.8rem;display:inline-flex;gap:6px;align-items:center}
+.pillar-pick button.on{background:color-mix(in srgb,var(--pc) 22%,var(--surface));border-color:var(--pc)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;z-index:60;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface-2)}
+.kpi b{font-family:var(--f-display);font-size:1.5rem;display:block}
+.kpi span{font-size:.76rem;color:var(--muted);font-weight:600}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.stack{display:flex;height:18px;border-radius:9px;overflow:hidden;background:var(--line)}
+.stack i{display:block;height:100%}
+.rep-table{width:100%;border-collapse:collapse;font-size:.86rem}
+.rep-table th,.rep-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.rep-table th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.scorepill{display:inline-block;min-width:42px;text-align:center;padding:2px 8px;border-radius:999px;font-weight:700;color:#fff}
+.evt{width:100%;border-collapse:separate;border-spacing:0;font-size:.86rem;min-width:860px}
+.evt thead th{position:sticky;top:0;text-align:left;padding:10px;font-family:var(--f-display);font-size:.88rem;background:var(--surface);border-bottom:2px solid var(--line)}
+.evt thead th:nth-child(2){color:var(--commerce)}.evt thead th:nth-child(3){color:var(--creed)}
+.evt tbody th{text-align:left;padding:12px 10px;vertical-align:top;font-family:var(--f-display);font-size:.88rem;width:150px;border-top:1px solid var(--line)}
+.evt td{padding:12px 10px;vertical-align:top;border-top:1px solid var(--line);width:30%}
+.evt td.bar-col{background:color-mix(in srgb,var(--creed) 7%,transparent)}
+.cite{font-size:.7em;margin-left:1px}.cite a{color:var(--indigo);text-decoration:none;font-weight:700}.cite a:hover{text-decoration:underline}
+.ev-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:700;color:var(--ev);background:color-mix(in srgb,var(--ev) 14%,transparent);border:1px solid color-mix(in srgb,var(--ev) 35%,transparent)}
+.ev-list{margin:0;padding-left:1.1rem;display:grid;gap:8px}
+.refs{margin:0;padding-left:1.4rem;display:grid;gap:8px;font-size:.86rem;max-width:110ch}
+.refs li:target{background:color-mix(in srgb,var(--gold) 18%,transparent);border-radius:6px}
+.refs a{color:var(--indigo);font-weight:600}
+.kpi-inline{display:inline-flex;align-items:baseline;gap:6px;font-size:.8rem;color:var(--muted);font-weight:600}.kpi-inline b{font-family:var(--f-display);font-size:1.4rem}
+.empty{padding:18px;border:1px dashed var(--line);border-radius:12px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="sky" id="sky">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#fde68a" stroke="#fde68a"/><rect x="3" y="13" width="8" height="8" rx="2"/><path d="M17 13.5a3.5 3.5 0 1 0 3.5 4.5A2.8 2.8 0 0 1 17 13.5z" fill="#fff"/></svg></div>
+        <div><h1>Barakah Time Box</h1><small>Creed to Commerce planner</small></div>
+      </div>
+      <div class="datebar">
+        <button class="glass" data-act="day" data-d="-1" aria-label="Previous day">‹</button>
+        <div class="glass date"><b id="hdrDate"></b><span id="hdrHijri"></span></div>
+        <button class="glass" data-act="day" data-d="1" aria-label="Next day">›</button>
+        <button class="glass" data-act="today">Today</button>
+        <div class="glass next-pill" id="nextPill"></div>
+        <button class="glass" data-act="theme" aria-label="Switch theme" id="themeBtn">◐</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Sections">
+      <a href="#dashboard">Dashboard</a>
+      <a href="#timebox">Time Box</a>
+      <a href="#salah">Salah</a>
+      <a href="#model">Creed to Commerce</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#reports">Reports</a>
+      <a href="#setup">Setup</a>
+    </nav>
+  </div>
+</div>
+<main class="wrap" id="app"></main>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<script>
+(function(){
+"use strict";
+/* ---------- utilities ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const pad=n=>String(n).padStart(2,"0");
+const keyOf=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const dateOf=k=>{const[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d,12)};
+const addDays=(k,n)=>{const d=dateOf(k);d.setDate(d.getDate()+n);return keyOf(d)};
+const todayKey=()=>keyOf(new Date());
+const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()+d.getSeconds()/60};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const LS="barakah-timebox-v1";
+
+const PILLARS={
+  creed:{name:"Creed",sub:"Ibadah, Quran, dhikr",cls:"p-creed",hex:"#0f9d76"},
+  craft:{name:"Craft",sub:"Learning, skill, deep work",cls:"p-craft",hex:"#7c4dff"},
+  commerce:{name:"Commerce",sub:"Earning, clients, operations",cls:"p-commerce",hex:"#e39b06"},
+  care:{name:"Care",sub:"Family, health, rest",cls:"p-care",hex:"#e8437f"},
+  contrib:{name:"Contribution",sub:"Sadaqah, community, mentoring",cls:"p-contrib",hex:"#0a95d6"}
+};
+const FARD=["fajr","dhuhr","asr","maghrib","isha"];
+const PNAME={fajr:"Fajr",sunrise:"Sunrise",duha:"Duha",dhuhr:"Dhuhr",jumuah:"Jumu'ah",asr:"Asr",maghrib:"Maghrib",isha:"Isha",tahajjud:"Tahajjud"};
+const PAR={fajr:"الفجر",sunrise:"الشروق",duha:"الضحى",dhuhr:"الظهر",jumuah:"الجمعة",asr:"العصر",maghrib:"المغرب",isha:"العشاء",tahajjud:"التهجد"};
+const PSTAT=[["jamaah","Jama'ah",1],["ontime","On time",.9],["late","Late",.5],["qada","Qada",.25],["missed","Missed",0]];
+const PVAL=Object.fromEntries(PSTAT.map(s=>[s[0],s[2]]));
+const CONDUCT=[
+  ["truth","Spoke truthfully in every deal and message"],
+  ["amanah","Kept my commitments and deadlines (amanah)"],
+  ["fair","Gave full measure: fair price, fair effort, fair pay"],
+  ["clean","Kept earnings clear of riba, deception and doubtful gain"],
+  ["give","Gave something today: sadaqah, time or help"]
+];
+const METHODS={
+  mwl:{name:"Muslim World League",fajr:18,isha:17},
+  isna:{name:"ISNA (North America)",fajr:15,isha:15},
+  egypt:{name:"Egyptian General Authority",fajr:19.5,isha:17.5},
+  makkah:{name:"Umm al-Qura, Makkah",fajr:18.5,ishaMin:90},
+  karachi:{name:"University of Islamic Sciences, Karachi",fajr:18,isha:18},
+  gulf:{name:"Gulf Region",fajr:19.5,ishaMin:90},
+  jakim:{name:"JAKIM (Malaysia)",fajr:20,isha:18},
+  diyanet:{name:"Diyanet (Turkey)",fajr:18,isha:17}
+};
+const CITIES=[
+  ["Makkah",21.4225,39.8262,"makkah","Asia/Riyadh"],["Madinah",24.4686,39.6142,"makkah",""],["Riyadh",24.7136,46.6753,"makkah",""],["Dubai",25.2048,55.2708,"gulf","Asia/Dubai"],
+  ["Cairo",30.0444,31.2357,"egypt","Africa/Cairo"],["Istanbul",41.0082,28.9784,"diyanet","Europe/Istanbul"],["London",51.5072,-0.1276,"mwl","Europe/London"],
+  ["New York",40.7128,-74.006,"isna","America/New_York"],["Chicago",41.8781,-87.6298,"isna","America/Chicago"],["Houston",29.7604,-95.3698,"isna",""],
+  ["Los Angeles",34.0522,-118.2437,"isna","America/Los_Angeles"],["Toronto",43.6532,-79.3832,"isna","America/Toronto"],
+  ["Karachi",24.8607,67.0011,"karachi","Asia/Karachi"],["Lahore",31.5204,74.3587,"karachi",""],["Dhaka",23.8103,90.4125,"karachi","Asia/Dhaka"],
+  ["Jakarta",-6.2088,106.8456,"mwl","Asia/Jakarta"],["Kuala Lumpur",3.139,101.6869,"jakim","Asia/Kuala_Lumpur"],["Lagos",6.5244,3.3792,"mwl","Africa/Lagos"],
+  ["Sydney",-33.8688,151.2093,"mwl","Australia/Sydney"],["Paris",48.8566,2.3522,"mwl","Europe/Paris"],["Berlin",52.52,13.405,"mwl","Europe/Berlin"]
+];
+
+/* ---------- state ---------- */
+function defaultSettings(){
+  let tz="";try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||""}catch(e){}
+  const c=CITIES.find(c=>c[4]&&c[4]===tz)||CITIES[0];
+  return {city:c[0],lat:c[1],lng:c[2],method:c[3],asr:"standard",wudu:10,dur:{fajr:15,dhuhr:20,asr:15,maghrib:15,isha:20},
+    jumuah:true,jumuahDur:60,tahajjud:true,duha:true,h24:false,theme:"auto",seeded:false,sampleDismissed:false,guessed:!(c[4]&&c[4]===tz)};
+}
+const S={settings:defaultSettings(),days:{}};
+let viewKey=todayKey();
+let route="dashboard";
+function newDay(){return{intention:"",priorities:[{t:"",d:false},{t:"",d:false},{t:"",d:false}],dump:[],boxes:[],prayers:{},nafl:{},conduct:{},reflection:""}}
+function getDay(k,create=true){if(!S.days[k]&&create)S.days[k]=newDay();return S.days[k]||newDay()}
+
+/* ---------- prayer engine (astronomical) ---------- */
+const D2R=Math.PI/180,R2D=180/Math.PI;
+const dsin=d=>Math.sin(d*D2R),dcos=d=>Math.cos(d*D2R),dtan=d=>Math.tan(d*D2R);
+const fix=(a,b)=>{a=a-b*Math.floor(a/b);return a<0?a+b:a};
+function julian(y,m,d){if(m<=2){y-=1;m+=12}const A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5}
+function sunPos(jd){const D=jd-2451545,g=fix(357.529+.98560028*D,360),q=fix(280.459+.98564736*D,360),L=fix(q+1.915*dsin(g)+.02*dsin(2*g),360),e=23.439-.00000036*D;
+  const RA=fix(Math.atan2(dcos(e)*dsin(L),dcos(L))*R2D/15,24);return{decl:Math.asin(dsin(e)*dsin(L))*R2D,eqt:q/15-RA}}
+const ptCache={};
+function prayerTimes(k){
+  const s=S.settings,ck=k+"|"+s.lat+"|"+s.lng+"|"+s.method+"|"+s.asr;if(ptCache[ck])return ptCache[ck];
+  const d=dateOf(k),M=METHODS[s.method]||METHODS.mwl,lat=+s.lat,lng=+s.lng;
+  const tz=-d.getTimezoneOffset()/60, jd0=julian(d.getFullYear(),d.getMonth()+1,d.getDate())-lng/(15*24);
+  const midDay=t=>{const e=sunPos(jd0+t).eqt;return fix(12-e,24)};
+  const sunAngle=(ang,t,ccw)=>{const decl=sunPos(jd0+t).decl,noon=midDay(t);const v=(-dsin(ang)-dsin(decl)*dsin(lat))/(dcos(decl)*dcos(lat));const T=Math.acos(v)*R2D/15;return noon+(ccw?-T:T)};
+  const asrT=(f,t)=>{const decl=sunPos(jd0+t).decl;const ang=-Math.atan(1/(f+dtan(Math.abs(lat-decl))))*R2D;return sunAngle(ang,t)};
+  let T={fajr:5,sunrise:6,dhuhr:12,asr:13,sunset:18,isha:18};
+  for(let i=0;i<2;i++){const p={};for(const x in T)p[x]=(isNaN(T[x])?12:T[x])/24;
+    T={fajr:sunAngle(M.fajr,p.fajr,true),sunrise:sunAngle(.833,p.sunrise,true),dhuhr:midDay(p.dhuhr),asr:asrT(s.asr==="hanafi"?2:1,p.asr),sunset:sunAngle(.833,p.sunset),isha:M.ishaMin?NaN:sunAngle(M.isha,p.isha)}}
+  for(const x in T)T[x]+=tz-lng/15;
+  const night=24-T.sunset+T.sunrise;
+  if(isNaN(T.fajr)||T.sunrise-T.fajr>night*M.fajr/60)T.fajr=T.sunrise-night*M.fajr/60;
+  if(M.ishaMin)T.isha=T.sunset+M.ishaMin/60;else if(isNaN(T.isha)||T.isha-T.sunset>night*M.isha/60)T.isha=T.sunset+night*M.isha/60;
+  T.dhuhr+=1/60;T.maghrib=T.sunset+1/60;
+  const r={};for(const x in T)r[x]=Math.round(fix(T[x],24)*60);
+  const nightLen=1440-r.maghrib+r.fajr;
+  r.lastThird=Math.round(r.fajr-nightLen/3);r.midnight=Math.round((r.maghrib+nightLen/2)%1440);r.duha=r.sunrise+20;
+  ptCache[ck]=r;return r;
+}
+function isFriday(k){return dateOf(k).getDay()===5}
+function sacredBlocks(k){
+  const s=S.settings,t=prayerTimes(k),w=+s.wudu||0,out=[];
+  if(s.tahajjud){const st=Math.max(t.lastThird,t.fajr-75);out.push({key:"tahajjud",nafl:true,time:st,start:st,dur:Math.min(45,t.fajr-st-10)})}
+  for(const p of FARD){let key=p,dur=+s.dur[p]||15;if(p==="dhuhr"&&s.jumuah&&isFriday(k)){key="jumuah";dur=+s.jumuahDur||60}
+    out.push({key,fard:p,time:t[p],start:t[p]-w,dur:dur+w})}
+  if(s.duha)out.push({key:"duha",nafl:true,time:t.duha,start:t.duha,dur:15});
+  return out.sort((a,b)=>a.start-b.start);
+}
+function tlRange(k){const t=prayerTimes(k);const start=Math.max(0,Math.floor((Math.min(t.fajr-90,S.settings.tahajjud?Math.max(t.lastThird,t.fajr-75)-15:9999))/60)*60);return{start,end:1440}}
+function segments(k){
+  const t=prayerTimes(k),r=tlRange(k);
+  return [
+    {id:"night",name:"Pre-dawn",ar:"السحر",from:r.start,to:t.fajr,cp:"Fajr"},
+    {id:"morning",name:"Fajr to Dhuhr",ar:"البكور",from:t.fajr,to:t.dhuhr,cp:isFriday(k)&&S.settings.jumuah?"Jumu'ah":"Dhuhr"},
+    {id:"noon",name:"Dhuhr to Asr",ar:"الظهيرة",from:t.dhuhr,to:t.asr,cp:"Asr"},
+    {id:"aft",name:"Asr to Maghrib",ar:"العصر",from:t.asr,to:t.maghrib,cp:"Maghrib"},
+    {id:"eve",name:"Maghrib to Isha",ar:"المساء",from:t.maghrib,to:t.isha,cp:"Isha"},
+    {id:"late",name:"After Isha",ar:"الليل",from:t.isha,to:1440,cp:"Night review"}
+  ];
+}
+function segStatus(k,seg){
+  const tk=todayKey(),boxes=getDay(k,false).boxes.filter(b=>b.start>=seg.from&&b.start<seg.to);
+  const pending=boxes.filter(b=>b.status==="pending").length;
+  let st;
+  if(k>tk)st="upcoming";else if(k<tk)st=pending?"due":"closed";
+  else{const n=nowMin();st=n<seg.from?"upcoming":n<seg.to?"live":(pending?"due":"closed")}
+  return{boxes,pending,st};
+}
+
+/* ---------- formatting ---------- */
+function fmt(min){min=Math.round(min);min=((min%1440)+1440)%1440;const h=Math.floor(min/60),m=min%60;
+  if(S.settings.h24)return pad(h)+":"+pad(m);return ((h%12)||12)+":"+pad(m)+(h<12?" AM":" PM")}
+const hhmm=min=>{min=((Math.round(min)%1440)+1440)%1440;return pad(Math.floor(min/60))+":"+pad(min%60)};
+const parseHM=s=>{const[a,b]=String(s||"0:0").split(":").map(Number);return (a||0)*60+(b||0)};
+function hijri(k){const d=dateOf(k);for(const c of["islamic-umalqura","islamic"]){try{return new Intl.DateTimeFormat("en-u-ca-"+c,{day:"numeric",month:"long",year:"numeric"}).format(d)}catch(e){}}return""}
+const longDate=k=>dateOf(k).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+const shortDate=k=>dateOf(k).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+const durTxt=m=>m>=60?(Math.floor(m/60)+"h"+(m%60?" "+(m%60)+"m":"")):m+"m";
+
+/* ---------- scheduling helpers ---------- */
+function overlaps(a,b){return a.start<b.start+b.dur&&b.start<a.start+a.dur}
+function conflictOf(k,box){return sacredBlocks(k).find(s=>overlaps(s,box))}
+function findFree(k,dur,from,ignoreId){
+  const r=tlRange(k),occ=sacredBlocks(k).concat(getDay(k).boxes.filter(b=>b.id!==ignoreId));
+  let t=Math.max(r.start,Math.ceil(from/15)*15);
+  while(t+dur<=r.end){const c={start:t,dur};const hit=occ.find(o=>overlaps(o,c));if(!hit)return t;t=Math.ceil((hit.start+hit.dur)/15)*15}
+  return null;
+}
+
+/* ---------- scoring ---------- */
+const W={box:.35,salah:.30,prio:.20,focus:.15};
+function gradeOf(s){if(s==null)return["Not started","Plan and check your boxes to earn a score."];if(s>=90)return["Ihsan","Excellence: worship and work both at their best."];if(s>=75)return["Itqan","Mastery: strong, consistent execution."];if(s>=60)return["Steady","Solid day. Tighten one checkpoint."];if(s>=40)return["Rebuilding","Recover at the next prayer checkpoint."];return["Fresh start","Every prayer is a reset. Start at the next one."]}
+function dayStats(k){
+  const tk=todayKey(),day=getDay(k,false),isToday=k===tk,future=k>tk,n=nowMin(),t=prayerTimes(k);
+  const due=future?[]:day.boxes.filter(b=>!isToday||b.start+b.dur<=n||b.status!=="pending");
+  const boxV=due.length?due.reduce((a,b)=>a+(b.status==="done"?1:b.status==="partial"?.5:0),0)/due.length:null;
+  const pDue=future?[]:FARD.filter(p=>!isToday||t[p]<=n);
+  const salah=pDue.length?pDue.reduce((a,p)=>a+(PVAL[day.prayers[p]]??0),0)/pDue.length:null;
+  const filled=day.priorities.filter(p=>p.t.trim());
+  const prio=filled.length&&!future?filled.filter(p=>p.d).length/filled.length:null;
+  const rated=day.boxes.filter(b=>b.focus>0);
+  const focus=rated.length?rated.reduce((a,b)=>a+b.focus,0)/rated.length/5:null;
+  const comps={box:boxV,salah,prio,focus};let num=0,den=0;for(const c in comps)if(comps[c]!=null){num+=W[c]*comps[c];den+=W[c]}
+  const bonus=(day.nafl.tahajjud?5:0)+(day.nafl.duha?3:0);
+  const score=den?Math.min(100,Math.round(num/den*100+bonus)):null;
+  const byP={};for(const p in PILLARS)byP[p]={plan:0,done:0};
+  for(const b of day.boxes){byP[b.pillar].plan+=b.dur;byP[b.pillar].done+=b.status==="done"?b.dur:b.status==="partial"?b.dur/2:0}
+  const prayerMin=FARD.reduce((a,p)=>a+(day.prayers[p]&&day.prayers[p]!=="missed"?(+S.settings.dur[p]||15):0),0)+(day.nafl.tahajjud?40:0)+(day.nafl.duha?15:0);
+  const creedMin=byP.creed.done+prayerMin,commerceMin=byP.commerce.done;
+  const conflicts=day.boxes.filter(b=>conflictOf(k,b)).length;
+  const totalMin=day.boxes.reduce((a,b)=>a+b.dur,0)+prayerMin;
+  const c2c={
+    anchor:day.boxes.length?1-conflicts/day.boxes.length:(future?null:1),
+    early:day.boxes.some(b=>(b.pillar==="commerce"||b.pillar==="craft")&&b.start>=t.fajr&&b.start<t.sunrise+180)?1:0,
+    creedShare:totalMin?Math.min(1,(byP.creed.plan+prayerMin)/totalMin/.2):0,
+    integrity:CONDUCT.filter(c=>day.conduct[c[0]]).length/CONDUCT.length,
+    contrib:day.boxes.some(b=>b.pillar==="contrib"&&b.status==="done")?1:day.boxes.some(b=>b.pillar==="contrib")?.5:0
+  };
+  const cv=Object.values(c2c).filter(v=>v!=null);const alignment=cv.length?Math.round(cv.reduce((a,b)=>a+b,0)/cv.length*100):null;
+  return{score,comps,bonus,grade:gradeOf(score),byP,prayerMin,creedMin,commerceMin,conflicts,c2c,alignment,
+    boxes:day.boxes.length,done:day.boxes.filter(b=>b.status==="done").length,pending:day.boxes.filter(b=>b.status==="pending").length,
+    prayersOk:FARD.filter(p=>["jamaah","ontime"].includes(day.prayers[p])).length};
+}
+function streak(test){let k=todayKey(),n=0;if(!test(k))k=addDays(k,-1);while(S.days[k]&&test(k)){n++;k=addDays(k,-1)}return n}
+const allFive=k=>{const d=S.days[k];return d&&FARD.every(p=>["jamaah","ontime"].includes(d.prayers[p]))};
+const fajrOk=k=>{const d=S.days[k];return d&&["jamaah","ontime"].includes(d.prayers.fajr)};
+const checkedAll=k=>{const d=S.days[k];return d&&d.boxes.length>0&&k<todayKey()&&d.boxes.every(b=>b.status!=="pending")};
+
+/* ---------- sample data ---------- */
+function seedSample(){
+  const tk=todayKey();let rnd=7;const rand=()=>{rnd=(rnd*9301+49297)%233280;return rnd/233280};
+  const plan=[
+    ["Morning adhkar and Quran (2 pages)","creed","fajr",15,30],
+    ["Walk and stretch","care","sunrise",15,30],
+    ["Deep work: Q1 pricing model for date imports","craft","sunrise",60,90],
+    ["Client proposal: wholesale order for Al-Noor Grocers","commerce","sunrise",165,90],
+    ["Team stand-up","commerce","dhuhr",-75,30],
+    ["Qaylulah (midday rest)","care","dhuhr",-40,20],
+    ["Sales calls: 5 prospects","commerce","dhuhr",35,90],
+    ["Invoice follow-ups and bookkeeping","commerce","asr",25,45],
+    ["Course: financial accounting, lesson 4","craft","asr",75,45],
+    ["Dinner with family","care","maghrib",25,45],
+    ["Tafsir circle at the masjid","creed","isha",-5,0],
+    ["Mentor call with a student founder","contrib","isha",30,30],
+    ["Plan tomorrow and evening adhkar","creed","isha",65,20]
+  ];
+  for(let i=6;i>=0;i--){
+    const k=addDays(tk,-i),d=newDay(),t=prayerTimes(k),isToday=i===0,n=nowMin();d.sample=true;S.days[k]=d;
+    d.intention="Earn with honesty, serve my family, and keep every prayer on time.";
+    d.priorities=[{t:"Send the Al-Noor wholesale proposal",d:false},{t:"Close 2 of 5 sales calls",d:false},{t:"Finish accounting lesson 4",d:false}];
+    for(const [title,pillar,anchor,off,dur0] of plan){
+      if(title.startsWith("Tafsir")&&dateOf(k).getDay()!==4)continue;
+      const dur=dur0||45;let st=(anchor==="sunrise"?t.sunrise:t[anchor])+off;st=Math.round(st/15)*15;
+      const free=findFree(k,dur,st);if(free==null)continue;
+      const b={id:uid(),title,pillar,start:free,dur,status:"pending",focus:0,priority:/proposal|Sales calls|lesson 4/.test(title),note:"",sample:true};
+      if(!isToday||free+dur<=n){const r=rand();b.status=r<.68?"done":r<.86?"partial":"missed";b.focus=b.status==="missed"?0:3+Math.round(rand()*2)}
+      d.boxes.push(b);
+    }
+    d.dump=[{id:uid(),text:"Draft supplier contract renewal",pillar:"commerce",est:60,sample:true},{id:uid(),text:"Call parents",pillar:"care",est:20,sample:true},{id:uid(),text:"Review zakat calculation for the business",pillar:"contrib",est:45,sample:true},{id:uid(),text:"Memorise Surah Al-Mulk, verses 1-5",pillar:"creed",est:20,sample:true}];
+    for(const p of FARD){if(isToday&&t[p]>n)continue;const r=rand();d.prayers[p]=r<.35?"jamaah":r<.8?"ontime":r<.93?"late":"qada"}
+    if(!isToday||t.fajr<n){d.nafl.tahajjud=rand()<.55;d.nafl.duha=rand()<.6}
+    d.priorities.forEach(p=>{p.d=!isToday&&rand()<.7});
+    if(!isToday){CONDUCT.forEach(c=>{d.conduct[c[0]]=rand()<.8});d.reflection="Productive morning after Fajr. Sales calls ran long; protect the Asr checkpoint tomorrow."}
+  }
+}
+function hasSample(){return Object.values(S.days).some(d=>d.sample||d.boxes.some(b=>b.sample)||d.dump.some(x=>x.sample))}
+function removeSample(){
+  for(const k in S.days){const d=S.days[k];d.boxes=d.boxes.filter(b=>!b.sample);d.dump=d.dump.filter(x=>!x.sample);
+    if(d.sample&&!d.touched){const n=newDay();n.boxes=d.boxes;n.dump=d.dump;S.days[k]=n}else delete d.sample;
+    const nd=S.days[k];if(!nd.boxes.length&&!nd.dump.length&&!nd.intention&&!Object.keys(nd.prayers).length&&!nd.priorities.some(p=>p.t))delete S.days[k];
+    dirty.add(k);
+  }
+  S.settings.sampleDismissed=true;dirtySettings=true;save();
+}
+
+/* ---------- persistence: localStorage always, private db rows when signed in ---------- */
+let dirty=new Set(),dirtySettings=false,saveTimer=null,dbApi=null,userId=null,writing=false,firstSave=true;
+function touch(k,own){const d=getDay(k);if(own)d.touched=true;dirty.add(k);save()}
+function save(){clearTimeout(saveTimer);saveTimer=setTimeout(flush,500)}
+async function flush(){
+  if(firstSave){firstSave=false;S.settings.seeded=true;dirtySettings=true;Object.keys(S.days).forEach(k=>dirty.add(k))}
+  lsSet(LS,JSON.stringify(S));
+  if(!dbApi||!userId||writing){dirty.clear();dirtySettings=false;return}
+  writing=true;
+  try{
+    const base="data/users/"+userId;
+    if(dirtySettings){dirtySettings=false;await dbApi.doc(base+"/settings").set({settings:JSON.stringify(S.settings)})}
+    const keys=[...dirty];dirty.clear();
+    for(const k of keys){const ref=dbApi.doc(base+"/day-"+k);if(S.days[k])await ref.set({key:k,day:JSON.stringify(S.days[k])});else await ref.delete().catch(()=>{})}
+  }catch(e){console.warn("Save to account storage failed",e)}
+  writing=false;if(dirty.size||dirtySettings)save();
+}
+function loadLocal(){
+  const raw=lsGet(LS);if(!raw)return false;
+  try{const o=JSON.parse(raw);if(o&&o.settings){S.settings=Object.assign(defaultSettings(),o.settings);S.days=o.days||{};return true}}catch(e){}
+  return false;
+}
+async function connectDb(){
+  try{
+    if(!window.claude||!window.claude.use)return;
+    const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    if(!db||!user)return;const id=await user.id();if(!id)return;
+    dbApi=db;userId=id;
+    const snap=await Promise.race([db.collection("data/users/"+id).get(),new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),10000))]);
+    if(snap.empty){if(S.settings.seeded){dirtySettings=true;Object.keys(S.days).forEach(k=>dirty.add(k));save()}return}
+    const days={};let settings=null;
+    for(const doc of snap.docs){const v=doc.data()||{};try{if(doc.id==="settings")settings=JSON.parse(v.settings);else if(v.key&&v.day)days[v.key]=JSON.parse(v.day)}catch(e){}}
+    if(settings){S.settings=Object.assign(defaultSettings(),settings);firstSave=false}
+    S.days=days;lsSet(LS,JSON.stringify(S));applyTheme();render();toast("Synced with your account");
+  }catch(e){console.warn("Account storage unavailable",e)}
+}
+
+/* ---------- icons ---------- */
+const I={
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12h8M12 8v8"/></svg>',
+  lock:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 14h6M9 17h4"/></svg>',
+  wand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20 16 8M14 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM19 11l.6 1.4L21 13l-1.4.6L19 15l-.6-1.4L17 13l1.4-.6z"/></svg>',
+  dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg>'
+};
+
+/* ---------- render: header ---------- */
+const SKIES={night:["#14113a","#2b2a7a","#4c1d95"],morning:["#ff8a5b","#f6b042","#38bdf8"],noon:["#0369a1","#0ea5e9","#22d3ee"],aft:["#c2410c","#f59e0b","#fbbf24"],eve:["#9d174d","#db2777","#7c3aed"],late:["#0f172a","#1e1b4b","#3730a3"]};
+function currentSeg(){const k=todayKey(),n=nowMin(),t=prayerTimes(k);
+  if(n<t.fajr)return"night";if(n<t.sunrise+30)return"morning";if(n<t.dhuhr)return"noon";if(n<t.asr)return"noon";if(n<t.maghrib)return"aft";if(n<t.isha)return"eve";return"late"}
+function nextPrayer(){
+  const k=todayKey(),n=nowMin(),t=prayerTimes(k);
+  for(const p of FARD){if(t[p]>n){const key=p==="dhuhr"&&S.settings.jumuah&&isFriday(k)?"jumuah":p;return{key,at:t[p],left:t[p]-n}}}
+  const t2=prayerTimes(addDays(k,1));return{key:"fajr",at:t2.fajr,left:1440-n+t2.fajr};
+}
+function cdTxt(m){const s=Math.max(0,Math.round(m*60)),h=Math.floor(s/3600),mm=Math.floor(s%3600/60),ss=s%60;return(h?h+"h ":"")+pad(mm)+"m "+pad(ss)+"s"}
+function renderHeader(){
+  const sky=SKIES[currentSeg()],root=document.documentElement;root.style.setProperty("--sky-a",sky[0]);root.style.setProperty("--sky-b",sky[1]);root.style.setProperty("--sky-c",sky[2]);
+  $("#hdrDate").textContent=(viewKey===todayKey()?"Today · ":"")+dateOf(viewKey).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+  $("#hdrHijri").textContent=hijri(viewKey);
+  tickHeader();
+  document.querySelectorAll("#tabs a").forEach(a=>a.setAttribute("aria-current",a.getAttribute("href")==="#"+route?"page":"false"));
+}
+function tickHeader(){
+  const np=nextPrayer();$("#nextPill").innerHTML=`<span class="ar">${PAR[np.key]}</span><span><b>${PNAME[np.key]}</b> ${fmt(np.at)}<br><span class="num" style="font-size:.78rem;opacity:.9">in ${cdTxt(np.left)}</span></span>`;
+  const cd=$("#nextCount");if(cd)cd.textContent=cdTxt(np.left);
+}
+
+/* ---------- render: views ---------- */
+function render(){renderHeader();const app=$("#app");
+  const banner=hasSample()?`<div class="banner"><p><b>You are looking at sample data.</b> <span class="muted">Seven example days show how scoring, checkpoints and reports work.</span></p><button class="btn gold" data-act="askRemoveSample">Remove sample data</button></div>`:"";
+  const views={dashboard:vDashboard,timebox:vTimebox,salah:vSalah,model:vModel,evidence:vEvidence,reports:vReports,setup:vSetup};
+  app.innerHTML=banner+(views[route]||vDashboard)();
+  if(route==="timebox")mountTimeline();
+}
+function ringSvg(v,size=180,stroke=16,id="g1"){
+  const r=(size-stroke)/2,c=2*Math.PI*r,p=v==null?0:clamp(v,0,100)/100;
+  return`<svg viewBox="0 0 ${size} ${size}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset=".5" stop-color="#6366f1"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs>
+  <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${stroke}"/>
+  <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="url(#${id})" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c*p} ${c}"/></svg>`;
+}
+const pct=v=>v==null?"–":Math.round(v*100)+"%";
+const scoreColor=s=>s==null?"var(--muted)":s>=75?"var(--good)":s>=50?"var(--warn)":"var(--bad)";
+function compTile(lbl,v,col,w){return`<div class="comp"><div class="lbl">${lbl} <span class="muted">· ${Math.round(w*100)}%</span></div><b class="num">${pct(v)}</b><div class="bar"><i style="width:${v==null?0:v*100}%;--c:${col}"></i></div></div>`}
+
+function vDashboard(){
+  const k=viewKey,st=dayStats(k),day=getDay(k,false),t=prayerTimes(k),np=nextPrayer(),tk=todayKey();
+  const segs=segments(k).map(sg=>({...sg,...segStatus(k,sg)}));
+  const lbl={upcoming:"Upcoming",live:"In progress",due:"Checkpoint due",closed:"Checked"};
+  const queue=day.boxes.filter(b=>b.status==="pending"&&(k<tk||(k===tk&&b.start+b.dur<=nowMin()+5))).sort((a,b)=>a.start-b.start);
+  const recent=day.boxes.filter(b=>b.status!=="pending").sort((a,b)=>b.start-a.start).slice(0,3);
+  const chain=FARD.map(p=>{const v=day.prayers[p];const cls=v==="jamaah"||v==="ontime"?"ok":v==="late"||v==="qada"?"late":v==="missed"?"miss":"";return`<span class="${cls}">${PNAME[p==="dhuhr"&&isFriday(k)&&S.settings.jumuah?"jumuah":p]}</span>`}).join("")+
+    `<span class="${day.nafl.tahajjud?"ok":""}">Tahajjud</span><span class="${day.nafl.duha?"ok":""}">Duha</span>`;
+  const totalPlan=Object.values(st.byP).reduce((a,b)=>a+b.plan,0)||1;
+  const balTotal=st.creedMin+st.commerceMin||1;
+  return`<div class="grid g-dash">
+  <section class="card span-8" aria-label="Productivity score">
+    <div class="card-h"><div><div class="eyebrow">Productivity score · ${esc(shortDate(k))}</div></div><a class="btn sm" href="#reports">${I.pdf} Report</a></div>
+    <div class="hero">
+      <div class="ring">${ringSvg(st.score)}<div class="center"><b class="num">${st.score??"–"}</b><span>of 100</span></div></div>
+      <div>
+        <div class="grade">${st.grade[0]}</div>
+        <p class="muted" style="margin:.2rem 0 0">${st.grade[1]}${st.bonus?` Night and Duha prayers added <b>+${st.bonus}</b>.`:""}</p>
+        <div class="comps">
+          ${compTile("Boxes completed",st.comps.box,"var(--commerce)",W.box)}
+          ${compTile("Salah fidelity",st.comps.salah,"var(--creed)",W.salah)}
+          ${compTile("Top 3 priorities",st.comps.prio,"var(--gold)",W.prio)}
+          ${compTile("Focus quality",st.comps.focus,"var(--craft)",W.focus)}
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="card next-card span-4" aria-label="Next prayer">
+    <div class="eyebrow" style="color:rgba(255,255,255,.85)">Next anchor</div>
+    <div class="row" style="justify-content:space-between;align-items:flex-end;margin-top:4px"><div><div class="ar">${PAR[np.key]}</div><h2 style="font-size:1.4rem">${PNAME[np.key]} · ${fmt(np.at)}</h2></div></div>
+    <div class="count num" id="nextCount">${cdTxt(np.left)}</div>
+    <div class="muted" style="font-size:.85rem">Wrap up your current box ${S.settings.wudu} min early for wudu. ${esc(S.settings.city)} · ${esc(METHODS[S.settings.method].name)}</div>
+    <div class="chain">${chain}</div>
+  </section>
+
+  <section class="card span-12" aria-label="Box Check checkpoints">
+    <div class="card-h"><div><div class="eyebrow">Box Check framework</div><h2>Five prayers, five checkpoints</h2></div>
+      <span class="muted" style="font-size:.85rem">Each prayer closes a segment. Check every box in it before you pray.</span></div>
+    <div class="pipeline">${segs.map(s=>`<div class="cp ${s.st}"><div class="st">${lbl[s.st]}</div><b>${s.name}</b><div class="muted" style="font-size:.76rem">Check at ${s.cp} · ${fmt(s.to)}</div>
+      <div class="bar"><i style="width:${s.boxes.length?(s.boxes.length-s.pending)/s.boxes.length*100:0}%;--c:${s.st==="due"?"var(--warn)":"var(--good)"}"></i></div>
+      <div class="muted num" style="font-size:.74rem;margin-top:4px">${s.boxes.length-s.pending}/${s.boxes.length} boxes checked</div></div>`).join("")}</div>
+  </section>
+
+  <section class="card span-7" aria-label="Boxes waiting for a check">
+    <div class="card-h"><div><div class="eyebrow">Check queue</div><h2>${queue.length?queue.length+" box"+(queue.length>1?"es":"")+" waiting for a check":"All finished boxes are checked"}</h2></div><a class="btn sm" href="#timebox">Open planner</a></div>
+    <div class="check-list">${queue.length?queue.map(checkRow).join(""):`<div class="empty">Nothing to review right now. ${recent.length?"Recently checked:":"Add boxes in the Time Box planner."}</div>${recent.map(checkRow).join("")}`}</div>
+  </section>
+
+  <section class="card span-5" aria-label="Seven day trend">
+    <div class="card-h"><div><div class="eyebrow">Last 7 days</div><h2>Score and Salah trend</h2></div></div>
+    ${trendSvg(k)}
+    <div class="legend" style="margin-top:6px"><span><i class="dot" style="background:var(--indigo)"></i>Productivity score</span><span><i class="dot" style="background:var(--creed)"></i>Salah fidelity</span></div>
+    <div class="kpis" style="margin-top:12px">
+      <div class="kpi"><b class="num">${streak(allFive)}</b><span>day streak, all 5 on time</span></div>
+      <div class="kpi"><b class="num">${streak(fajrOk)}</b><span>day Fajr streak</span></div>
+      <div class="kpi"><b class="num">${streak(checkedAll)}</b><span>days fully box-checked</span></div>
+    </div>
+  </section>
+
+  <section class="card span-6" aria-label="Pillar mix">
+    <div class="card-h"><div><div class="eyebrow">Where the hours went</div><h2>Five pillars</h2></div><span class="muted num">${durTxt(totalPlan===1?0:totalPlan)} boxed</span></div>
+    <div class="stack">${Object.entries(st.byP).map(([p,v])=>`<i style="width:${v.plan/totalPlan*100}%;background:${`var(--${p})`}" title="${PILLARS[p].name}"></i>`).join("")}</div>
+    <div style="display:grid;gap:8px;margin-top:12px">${Object.entries(st.byP).map(([p,v])=>`<div class="row ${PILLARS[p].cls}" style="justify-content:space-between"><span class="row" style="gap:8px"><i class="dot pc-dot"></i><b>${PILLARS[p].name}</b><span class="muted" style="font-size:.8rem">${PILLARS[p].sub}</span></span><span class="num muted">${durTxt(Math.round(v.done))} done / ${durTxt(v.plan)}</span></div>`).join("")}</div>
+  </section>
+
+  <section class="card span-6" aria-label="Creed to Commerce balance">
+    <div class="card-h"><div><div class="eyebrow">Creed to Commerce</div><h2>Alignment ${st.alignment??"–"}<span class="muted" style="font-size:.9rem">/100</span></h2></div><a class="btn sm" href="#model">The model</a></div>
+    <div class="muted" style="font-size:.82rem;margin-bottom:6px">Creed minutes vs commerce minutes completed</div>
+    <div class="stack" style="height:24px"><i style="width:${st.creedMin/balTotal*100}%;background:linear-gradient(90deg,var(--creed),var(--sacred-b))"></i><i style="width:${st.commerceMin/balTotal*100}%;background:linear-gradient(90deg,var(--gold),var(--commerce))"></i></div>
+    <div class="row num" style="justify-content:space-between;margin:4px 0 12px;font-size:.82rem"><span style="color:var(--creed);font-weight:700">Creed ${durTxt(Math.round(st.creedMin))}</span><span style="color:var(--commerce);font-weight:700">Commerce ${durTxt(Math.round(st.commerceMin))}</span></div>
+    ${alignRows(st)}
+  </section>
+  </div>`;
+}
+function alignRows(st){
+  const rows=[["Prayer anchors kept",st.c2c.anchor,"var(--creed)"],["Early commerce start",st.c2c.early,"var(--commerce)"],["Creed share of day",st.c2c.creedShare,"var(--sacred-b)"],["Integrity checks",st.c2c.integrity,"var(--craft)"],["Contribution",st.c2c.contrib,"var(--contrib)"]];
+  return rows.map(r=>`<div class="align-row"><span style="font-size:.84rem;font-weight:600">${r[0]}</span><div class="bar" style="margin:0"><i style="width:${r[1]==null?0:r[1]*100}%;--c:${r[2]}"></i></div><span class="num muted" style="text-align:right">${pct(r[1])}</span></div>`).join("");
+}
+function checkRow(b){
+  const p=PILLARS[b.pillar];const sym={done:"✓",partial:"½",missed:"✕",pending:"·"}[b.status];
+  return`<div class="check-item ${p.cls}"><span class="status-ic ${b.status}">${sym}</span>
+    <div style="min-width:0"><div class="t">${b.priority?'<span class="star" style="color:var(--gold)">★</span> ':""}${esc(b.title)}</div><div class="s num">${fmt(b.start)} – ${fmt(b.start+b.dur)} · <span class="chip pc-chip">${p.name}</span></div></div>
+    <div class="ctl">${statusSeg(b)}${starsHtml(b)}</div></div>`;
+}
+function statusSeg(b){return`<div class="seg" role="group" aria-label="Box status">${[["done","Done"],["partial","Partial"],["missed","Missed"]].map(([v,l])=>`<button data-act="bstatus" data-id="${b.id}" data-v="${v}" class="${b.status===v?"on":""}" aria-pressed="${b.status===v}">${l}</button>`).join("")}</div>`}
+function starsHtml(b){return`<div class="stars" aria-label="Focus rating">${[1,2,3,4,5].map(i=>`<button data-act="bfocus" data-id="${b.id}" data-v="${i}" class="${b.focus>=i?"on":""}" aria-label="Focus ${i} of 5">★</button>`).join("")}</div>`}
+function trendSvg(k){
+  const days=[...Array(7)].map((_,i)=>addDays(k,i-6)),W2=420,H=180,L=30,B=24,T=10,cw=(W2-L-6)/7;
+  const st=days.map(d=>S.days[d]?dayStats(d):{score:null,comps:{salah:null}});
+  const y=v=>T+(H-T-B)*(1-v/100);
+  let g="";for(const v of[0,25,50,75,100])g+=`<line x1="${L}" x2="${W2-4}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="var(--muted)">${v}</text>`;
+  let bars="",pts=[];
+  days.forEach((d,i)=>{const s=st[i],x=L+i*cw+cw*.2,w=cw*.6;
+    if(s.score!=null)bars+=`<rect x="${x}" y="${y(s.score)}" width="${w}" height="${H-B-y(s.score)}" rx="5" fill="url(#tg)" opacity="${d===k?1:.75}"/><text x="${x+w/2}" y="${y(s.score)-4}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--ink)">${s.score}</text>`;
+    bars+=`<text x="${x+w/2}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--muted)" font-weight="${d===k?700:400}">${dateOf(d).toLocaleDateString(undefined,{weekday:"short"})}</text>`;
+    if(s.comps.salah!=null)pts.push([x+w/2,y(s.comps.salah*100)]);});
+  const line=pts.length>1?`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--creed)" stroke-width="2.5" stroke-linejoin="round"/>`:"";
+  const dots=pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="var(--surface)" stroke="var(--creed)" stroke-width="2"/>`).join("");
+  return`<svg viewBox="0 0 ${W2} ${H}" style="width:100%;height:auto" role="img" aria-label="Seven day score chart"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#a78bfa" stop-opacity=".55"/></linearGradient></defs>${g}${bars}${line}${dots}</svg>`;
+}
+
+/* ---- Time Box planner ---- */
+function vTimebox(){
+  const k=viewKey,day=getDay(k,false),st=dayStats(k);
+  const boxedIds=new Set(day.boxes.map(b=>b.fromDump).filter(Boolean));
+  const segs=segments(k).map(sg=>({...sg,...segStatus(k,sg)}));
+  return`<div class="planner">
+  <div class="col-left">
+    <section class="card"><div class="eyebrow">Niyyah</div><h3 style="margin-bottom:8px">Today's intention</h3>
+      <textarea id="intention" rows="2" data-bind="intention" placeholder="Why does today's work matter?">${esc(day.intention)}</textarea></section>
+    <section class="card"><div class="card-h"><div><div class="eyebrow">Top priorities</div><h3>The three that matter</h3></div><span class="chip num">${day.priorities.filter(p=>p.d).length}/3</span></div>
+      ${day.priorities.map((p,i)=>`<div class="prio"><span class="n">${i+1}</span><input type="checkbox" id="pd${i}" data-act="prioDone" data-i="${i}" ${p.d?"checked":""} aria-label="Priority ${i+1} done"><input type="text" id="pt${i}" data-bind="prio" data-i="${i}" value="${esc(p.t)}" placeholder="Priority ${i+1}"></div>`).join("")}
+    </section>
+    <section class="card"><div class="card-h"><div><div class="eyebrow">Brain dump</div><h3>Everything on your mind</h3></div>
+      <button class="btn sm primary" data-act="autobox" title="Place every unboxed item into free time between prayers">${I.wand} Auto-box</button></div>
+      <form class="dump-add" id="dumpForm"><input type="text" id="dumpText" placeholder="Add a task…" aria-label="New task"><button class="btn primary" type="submit" aria-label="Add task">${I.plus}</button>
+        <div class="row2"><select id="dumpPillar" aria-label="Pillar">${Object.entries(PILLARS).map(([v,p])=>`<option value="${v}" ${v==="commerce"?"selected":""}>${p.name}</option>`).join("")}</select><select id="dumpEst" aria-label="Estimate">${[15,30,45,60,90,120].map(m=>`<option value="${m}" ${m===30?"selected":""}>${durTxt(m)}</option>`).join("")}</select></div></form>
+      <div style="display:grid;gap:6px">${day.dump.length?day.dump.map(x=>`<div class="dump-item ${PILLARS[x.pillar].cls} ${boxedIds.has(x.id)?"boxed":""}" draggable="true" data-dump="${x.id}"><i class="dot pc-dot"></i><div style="min-width:0"><div class="t">${esc(x.text)}</div><div class="muted" style="font-size:.74rem">${PILLARS[x.pillar].name} · ${durTxt(x.est)}${boxedIds.has(x.id)?" · boxed":""}</div></div>
+        <div class="row" style="gap:4px;flex-wrap:nowrap"><button class="icon-btn" data-act="boxit" data-id="${x.id}" title="Box it into the next free slot" aria-label="Box it">${I.box}</button><button class="icon-btn" data-act="delDump" data-id="${x.id}" aria-label="Delete task">${I.trash}</button></div></div>`).join(""):`<div class="empty">Dump tasks here, then drag them onto the timeline or tap the box icon.</div>`}</div>
+    </section>
+  </div>
+  <section class="card tl-card" aria-label="Timeline">
+    <div class="tl-head"><div><div class="eyebrow">Time Box · ${esc(longDate(k))}</div><h2>Your day, anchored by Salah</h2></div>
+      <div class="row"><span class="chip"><i class="dot" style="background:var(--sacred-a)"></i>Prayer anchor (locked)</span>${st.conflicts?`<button class="btn sm danger" data-act="fixAll">Fix ${st.conflicts} conflict${st.conflicts>1?"s":""}</button>`:""}<button class="btn sm primary" data-act="newBox">${I.plus} New box</button></div></div>
+    <div class="tl-scroll" id="tlScroll"><div class="tl" id="tl"></div></div>
+  </section>
+  <div class="col-right">
+    <section class="card"><div class="card-h"><div><div class="eyebrow">Box Check</div><h3>Checkpoint review</h3></div><span class="chip num">${st.done}/${st.boxes} done</span></div>
+      <div style="display:grid;gap:12px">${segs.filter(s=>s.boxes.length).map(s=>`<div><div class="row" style="justify-content:space-between;margin-bottom:6px"><b style="font-size:.85rem">${s.name}</b><span class="chip" style="${s.st==="due"?"background:color-mix(in srgb,var(--warn) 22%,transparent)":s.st==="closed"?"background:color-mix(in srgb,var(--good) 20%,transparent)":""}">${{upcoming:"Upcoming",live:"Now",due:"Check due at "+s.cp,closed:"Checked"}[s.st]}</span></div>
+        <div class="check-list">${s.boxes.sort((a,b)=>a.start-b.start).map(checkRow).join("")}</div></div>`).join("")||`<div class="empty">No boxes yet. Click the timeline to add one.</div>`}</div>
+    </section>
+    <section class="card"><div class="eyebrow">Muhasabah</div><h3 style="margin-bottom:8px">End-of-day reflection</h3>
+      <textarea id="reflection" rows="3" data-bind="reflection" placeholder="What went well? What will you change tomorrow?">${esc(day.reflection)}</textarea></section>
+  </div></div>`;
+}
+const PPM=1.5;
+function layoutLanes(boxes){
+  const sorted=[...boxes].sort((a,b)=>a.start-b.start||b.dur-a.dur),out=new Map();let cluster=[],end=-1;
+  const finish=()=>{const lanes=[];for(const b of cluster){let i=lanes.findIndex(e=>e<=b.start);if(i<0){i=lanes.length;lanes.push(0)}lanes[i]=b.start+b.dur;out.set(b.id,{lane:i})}for(const b of cluster)out.get(b.id).n=lanes.length};
+  for(const b of sorted){if(b.start>=end&&cluster.length){finish();cluster=[]}cluster.push(b);end=Math.max(end,b.start+b.dur)}if(cluster.length)finish();return out;
+}
+function mountTimeline(){
+  const k=viewKey,tl=$("#tl"),r=tlRange(k),day=getDay(k,false),t=prayerTimes(k),y=m=>(m-r.start)*PPM;
+  tl.style.height=(r.end-r.start)*PPM+"px";
+  let h="";for(let m=Math.ceil(r.start/30)*30;m<r.end;m+=30)h+=`<div class="hr ${m%60?"half":""}" style="top:${y(m)}px">${m%60?"":`<span>${fmt(m)}</span>`}</div>`;
+  h+=`<div class="lane" id="lane">`;
+  for(const s of sacredBlocks(k))h+=`<div class="blk sacred ${s.nafl?"nafl":""}" style="top:${y(s.start)}px;height:${Math.max(20,s.dur*PPM-2)}px" title="${PNAME[s.key]} at ${fmt(s.time)}"><span class="ar">${PAR[s.key]}</span><b>${PNAME[s.key]}</b><span class="num">${fmt(s.time)}</span><span class="lock">${I.lock}${s.nafl?"Sunnah":s.key==="jumuah"?"Jumu'ah":"Fard"}${s.fard?" · wudu "+S.settings.wudu+"m":""}</span></div>`;
+  const lanes=layoutLanes(day.boxes);
+  for(const b of day.boxes){const L=lanes.get(b.id),w=100/L.n,cf=conflictOf(k,b),p=PILLARS[b.pillar],hpx=Math.max(22,b.dur*PPM-2);
+    h+=`<div class="blk box ${p.cls} ${b.status} ${cf?"conflict":""}" data-box="${b.id}" style="top:${y(b.start)}px;height:${hpx}px;left:calc(${L.lane*w}% + 2px);width:calc(${w}% - 4px)" tabindex="0" role="button" aria-label="${esc(b.title)}, ${fmt(b.start)}">
+      <div class="bt">${b.priority?'<b class="star">★</b>':""}<span>${esc(b.title)}</span>${cf?`<em class="tag">Clashes with ${PNAME[cf.key]}</em>`:""}</div>${hpx>36?`<div class="bm num">${fmt(b.start)} – ${fmt(b.start+b.dur)} · ${p.name}${b.status!=="pending"?" · "+b.status:""}</div>`:""}</div>`}
+  h+=`</div>`;
+  if(t.lastThird>r.start&&t.lastThird<t.fajr)h+=`<div class="marker" style="top:${y(t.lastThird)}px"><span>Last third of night · ${fmt(t.lastThird)}</span></div>`;
+  h+=`<div class="marker" style="top:${y(t.midnight<t.maghrib?t.midnight+1440:t.midnight)}px;${t.midnight<t.maghrib?"display:none":""}"><span>Isha preferred until ${fmt(t.midnight)}</span></div>`;
+  if(k===todayKey()){const n=nowMin();if(n>=r.start)h+=`<div class="nowline" style="top:${y(n)}px"></div>`}
+  tl.innerHTML=h;
+  const sc=$("#tlScroll");const focusAt=k===todayKey()?nowMin()-90:t.fajr-30;sc.scrollTop=Math.max(0,y(focusAt));
+  // click empty space -> new box
+  tl.addEventListener("click",e=>{if(e.target.closest(".blk"))return;const lane=$("#lane"),rect=lane.getBoundingClientRect();const m=Math.floor(((e.clientY-rect.top)/PPM+r.start)/15)*15;
+    const s=sacredBlocks(k).find(s=>m>=s.start&&m<s.start+s.dur);if(s){toast(`${fmt(s.start)} is reserved for ${PNAME[s.key]}`);return}openBox(null,m)});
+  tl.addEventListener("click",e=>{const s=e.target.closest(".blk.sacred");if(s){e.stopPropagation();location.hash="#salah"}});
+  // drag dump items
+  tl.addEventListener("dragover",e=>{e.preventDefault();tl.classList.add("drop-hover")});
+  tl.addEventListener("dragleave",()=>tl.classList.remove("drop-hover"));
+  tl.addEventListener("drop",e=>{e.preventDefault();tl.classList.remove("drop-hover");const id=e.dataTransfer.getData("text/plain");const x=day.dump.find(d=>d.id===id);if(!x)return;
+    const rect=$("#lane").getBoundingClientRect();let m=Math.round(((e.clientY-rect.top)/PPM+r.start)/15)*15;placeDump(x,m,true)});
+  // move boxes with pointer
+  tl.querySelectorAll(".blk.box").forEach(el=>{
+    let sy=0,moved=false,orig=0,b=null;
+    el.addEventListener("pointerdown",e=>{if(e.button!==0)return;b=day.boxes.find(x=>x.id===el.dataset.box);sy=e.clientY;orig=b.start;moved=false;el.setPointerCapture(e.pointerId)});
+    el.addEventListener("pointermove",e=>{if(!b)return;const dy=e.clientY-sy;if(!moved&&Math.abs(dy)<5)return;moved=true;el.classList.add("dragging");
+      const m=clamp(Math.round((orig+dy/PPM)/15)*15,r.start,r.end-b.dur);el.style.top=y(m)+"px";el.dataset.m=m});
+    el.addEventListener("pointerup",e=>{if(!b)return;const bb=b;b=null;el.classList.remove("dragging");
+      if(moved&&el.dataset.m!=null){bb.start=+el.dataset.m;const cf=conflictOf(k,bb);touch(k);render();if(cf)toast(`Overlaps ${PNAME[cf.key]}. Use "Fix conflicts" to move it after the prayer.`)}else openBox(bb)});
+    el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openBox(day.boxes.find(x=>x.id===el.dataset.box))}});
+  });
+  document.querySelectorAll("[data-dump]").forEach(el=>el.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",el.dataset.dump)}));
+}
+function placeDump(x,from,exact){
+  const k=viewKey,day=getDay(k);let st=from;
+  if(!exact||conflictOf(k,{start:from,dur:x.est})||day.boxes.some(b=>overlaps(b,{start:from,dur:x.est})))st=findFree(k,x.est,from);
+  if(st==null){toast("No free slot left today for "+durTxt(x.est));return false}
+  day.boxes.push({id:uid(),title:x.text,pillar:x.pillar,start:st,dur:x.est,status:"pending",focus:0,priority:false,note:"",fromDump:x.id,sample:x.sample||undefined});
+  touch(k);render();toast(`Boxed at ${fmt(st)}`);return true;
+}
+function startFrom(k){const tk=todayKey(),t=prayerTimes(k);if(k===tk)return Math.max(nowMin(),t.fajr);return t.fajr+30}
+
+/* ---- Salah view ---- */
+function vSalah(){
+  const k=viewKey,day=getDay(k,false),t=prayerTimes(k),tk=todayKey(),np=nextPrayer();
+  const cards=[...FARD].map(p=>{const key=p==="dhuhr"&&S.settings.jumuah&&isFriday(k)?"jumuah":p;const isNext=k===tk&&np.key===key;
+    return`<div class="pcard ${isNext?"now":""}"><div class="top"><div><div class="ar">${PAR[key]}</div><b>${PNAME[key]}</b></div><div class="time num">${fmt(t[p])}</div></div>
+    <div class="seg" role="group" aria-label="${PNAME[key]} status" style="flex-wrap:wrap">${PSTAT.map(([v,l])=>`<button data-act="pstat" data-p="${p}" data-v="${v}" class="${day.prayers[p]===v?"on":""}" aria-pressed="${day.prayers[p]===v}">${l}</button>`).join("")}</div>
+    <div class="muted" style="font-size:.76rem">Box locked ${fmt(t[p]-S.settings.wudu)} – ${fmt(t[p]+(key==="jumuah"?+S.settings.jumuahDur:+S.settings.dur[p]))}</div></div>`}).join("");
+  const week=[...Array(7)].map((_,i)=>addDays(k,i-6));
+  return`<div class="grid">
+  <section class="card"><div class="card-h"><div><div class="eyebrow">${esc(S.settings.city)} · ${esc(METHODS[S.settings.method].name)} · Asr ${S.settings.asr==="hanafi"?"Hanafi":"standard"}</div><h2>Salah for ${esc(longDate(k))}</h2></div><a class="btn sm" href="#setup">Change location</a></div>
+    ${S.settings.guessed?`<p class="banner" style="margin-top:0">Times are set for ${esc(S.settings.city)}. Open Setup to choose your city or enter coordinates.</p>`:""}
+    <div class="prayer-grid">${cards}</div></section>
+  <div class="grid g-dash">
+  <section class="card span-6"><div class="eyebrow">Qiyam al-Layl</div><h2 style="margin-bottom:10px">Night and voluntary worship</h2>
+    <table class="rep-table num"><tbody>
+      <tr><td>Maghrib (night begins)</td><td><b>${fmt(t.maghrib)}</b></td></tr>
+      <tr><td>Isha</td><td><b>${fmt(t.isha)}</b></td></tr>
+      <tr><td>Middle of the night</td><td><b>${fmt(t.midnight)}</b></td></tr>
+      <tr><td>Last third begins (best for Tahajjud)</td><td><b>${fmt(t.lastThird)}</b></td></tr>
+      <tr><td>Fajr</td><td><b>${fmt(t.fajr)}</b></td></tr>
+      <tr><td>Sunrise</td><td><b>${fmt(t.sunrise)}</b></td></tr>
+      <tr><td>Duha (from)</td><td><b>${fmt(t.duha)}</b></td></tr></tbody></table>
+    <div class="row" style="margin-top:12px">
+      <label class="btn"><input type="checkbox" id="naflT" data-act="nafl" data-n="tahajjud" ${day.nafl.tahajjud?"checked":""}> Prayed Tahajjud <span class="chip">+5</span></label>
+      <label class="btn"><input type="checkbox" id="naflD" data-act="nafl" data-n="duha" ${day.nafl.duha?"checked":""}> Prayed Duha <span class="chip">+3</span></label></div>
+    <p class="muted" style="font-size:.82rem;margin-bottom:0">"Indeed, rising by night is stronger in impression and more suitable for words." Quran 73:6</p>
+  </section>
+  <section class="card span-6"><div class="eyebrow">Consistency</div><h2 style="margin-bottom:10px">7-day Salah record</h2>
+    <div class="tablewrap"><table class="week"><thead><tr><th>Day</th>${FARD.map(p=>`<th>${PNAME[p]}</th>`).join("")}<th>Night</th></tr></thead><tbody>
+    ${week.map(d=>{const x=S.days[d];return`<tr><td>${esc(shortDate(d))}</td>${FARD.map(p=>`<td><span class="pd ${x?x.prayers[p]||"":""}" title="${x&&x.prayers[p]||"not logged"}"></span></td>`).join("")}<td><span class="pd ${x&&x.nafl.tahajjud?"jamaah":""}"></span></td></tr>`}).join("")}</tbody></table></div>
+    <div class="legend" style="margin-top:10px">${PSTAT.map(([v,l])=>`<span><i class="pd ${v}"></i>${l}</span>`).join("")}</div>
+    <div class="kpis" style="margin-top:12px"><div class="kpi"><b class="num">${streak(allFive)}</b><span>days all 5 on time</span></div><div class="kpi"><b class="num">${streak(fajrOk)}</b><span>Fajr streak</span></div></div>
+  </section></div></div>`;
+}
+
+/* ---- Creed to Commerce model ---- */
+function vModel(){
+  const k=viewKey,st=dayStats(k),day=getDay(k,false);
+  const imp=[
+    ["creed","Fixed anchors, flexible boxes","Prayer is set at fixed times, so the day already has five appointments that never move. Every other box is planned around them, which removes most daily scheduling decisions.","Quran 4:103: prayer is prescribed at fixed times."],
+    ["commerce","Five checkpoints instead of one review","Each prayer closes a segment of the day. Before you pray you check the boxes in that segment: done, partial or missed. Drift is caught within hours, not at the end of the week.","Built into the Box Check pipeline on the dashboard."],
+    ["craft","The day starts at Fajr","The hours after Fajr are the quietest and least interrupted. Hard craft and revenue work goes there first, before messages and meetings start.","Hadith: \"O Allah, bless my nation in its early mornings.\" (Abu Dawud, Tirmidhi)"],
+    ["creed","Commerce with a ceiling","Trade is encouraged, but it pauses for the call to prayer. Meetings are never booked into a prayer window, and the planner flags any box that tries.","Quran 62:9-10 and 24:37."],
+    ["contrib","Integrity is a KPI","Output alone is not the score. Truthfulness, kept promises and clean earnings are logged every day and feed the alignment score.","Hadith: the truthful, trustworthy merchant is with the prophets and the righteous. (Tirmidhi)"],
+    ["care","Rest and night are investments","Sleep soon after Isha, a short midday rest and the last third of the night for Tahajjud are planned as boxes, not taken from leftover time.","Quran 73:6, 17:79. Hadith on health and free time (Bukhari)."]
+  ];
+  return`<div class="grid">
+  <section class="card thesis"><div class="eyebrow" style="color:#fde68a">The paradigm shift</div>
+    <h2>From Commerce-first to Creed to Commerce</h2>
+    <p>Most time-boxing systems treat revenue as the spine of the day and fit worship into whatever gaps remain. This model reverses the order. The five daily prayers are the spine. Commerce, craft and care are boxed into the windows between them, and every window ends with an honest check.</p>
+    <p class="q">"And when the prayer has been concluded, disperse within the land and seek from the bounty of Allah, and remember Allah often that you may succeed." Quran 62:10</p></section>
+
+  <section class="card"><div class="card-h"><div><div class="eyebrow">The model</div><h2>How value flows through the day</h2></div></div>
+    <div class="flow">
+      <div class="st" style="background:linear-gradient(135deg,var(--sacred-a),var(--creed))"><b>1 · Creed</b><small>Intention and the five anchors. Sets why you work and when you stop.</small></div>
+      <div class="st" style="background:linear-gradient(135deg,#5b21b6,var(--craft))"><b>2 · Craft</b><small>Skill and deep work with itqan, doing the job properly.</small></div>
+      <div class="st" style="background:linear-gradient(135deg,#b45309,var(--commerce))"><b>3 · Commerce</b><small>Honest earning: clients, sales, operations, all boxed between prayers.</small></div>
+      <div class="st" style="background:linear-gradient(135deg,#0369a1,var(--contrib))"><b>4 · Contribution</b><small>Earnings and time flow back as sadaqah, zakat and mentoring.</small></div>
+    </div>
+    <div class="foundation"><b style="font-family:var(--f-display)">Care is the foundation.</b> Family, health and rest keep the whole chain running. The planner tracks it as its own pillar.</div>
+  </section>
+
+  <div class="grid g-dash">
+  <section class="card span-7"><div class="eyebrow">Old frame vs new frame</div><h2 style="margin-bottom:8px">What changes</h2>
+    <div class="tablewrap"><table class="cmp"><thead><tr><th>Commerce-first day</th><th style="color:var(--creed)">Creed to Commerce day</th></tr></thead><tbody>
+      <tr><td>Revenue is the spine; worship fits in the gaps</td><td>Five prayers are the spine; work fills the boxes between them</td></tr>
+      <tr><td>The day starts when the inbox opens</td><td>The day starts at Fajr, with the best hours for deep work</td></tr>
+      <tr><td>One weekly review</td><td>Five checkpoints a day, one at each prayer</td></tr>
+      <tr><td>Productivity means output</td><td>Productivity means output, focus, priorities and Salah together</td></tr>
+      <tr><td>Rest is lost time</td><td>Rest, Qaylulah and early sleep are planned boxes</td></tr>
+      <tr><td>Profit is the destination</td><td>Contribution is the destination; profit is the means</td></tr>
+    </tbody></table></div></section>
+  <section class="card span-5"><div class="card-h"><div><div class="eyebrow">${esc(shortDate(k))}</div><h2>Your alignment: ${st.alignment??"–"}/100</h2></div></div>
+    ${alignRows(st)}
+    <h3 style="margin:14px 0 8px">Integrity checks</h3>
+    <div class="conduct">${CONDUCT.map(([id,l])=>`<label><input type="checkbox" id="cd-${id}" data-act="conduct" data-c="${id}" ${day.conduct[id]?"checked":""}><span>${l}</span></label>`).join("")}</div>
+  </section></div>
+
+  <section><div class="eyebrow" style="margin-bottom:8px">Implications</div><div class="imp">${imp.map(([p,h,b,s])=>`<div class="card ${PILLARS[p].cls}" style="border-top-color:var(--pc)"><h3>${h}</h3><p style="margin:.4rem 0 0">${b}</p><div class="src">${esc(s)}</div></div>`).join("")}</div></section>
+  </div>`;
+}
+
+/* ---- Evidence: Timebox vs Barakah Time Box ---- */
+const REFS=[
+  {id:1,t:"Zao-Sanders, M. (2018, December 12). How timeboxing works and why it will make you more productive. Harvard Business Review.",u:"https://hbr.org/2018/12/how-timeboxing-works-and-why-it-will-make-you-more-productive"},
+  {id:2,t:"Zao-Sanders, M. (2024). Timeboxing: The power of doing one thing at a time. Michael Joseph / St. Martin's Press.",u:"https://us.macmillan.com/books/9781250341167/timeboxing"},
+  {id:3,t:"Faris, M. (2016). The Productive Muslim: Where faith meets productivity. (Spiritual, physical and social productivity; developed further in The Barakah Effect.)",u:"https://productivemuslim.com/barakaheffectbook/"},
+  {id:4,t:"Gollwitzer, P. M., & Sheeran, P. (2006). Implementation intentions and goal achievement: A meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69-119.",u:"https://doi.org/10.1016/S0065-2601(06)38002-1"},
+  {id:5,t:"Sheeran, P., Listrom, O., & Gollwitzer, P. M. (2025). The when and how of planning: Meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology.",u:"https://scholar.google.com/scholar?q=%22The+when+and+how+of+planning%22+implementation+intentions+642+tests"},
+  {id:6,t:"Buehler, R., Griffin, D., & Ross, M. (1994). Exploring the \"planning fallacy\": Why people underestimate their task completion times. Journal of Personality and Social Psychology, 67(3), 366-381.",u:"https://doi.org/10.1037/0022-3514.67.3.366"},
+  {id:7,t:"Albulescu, P., Macsinga, I., Rusu, A., Sulea, C., Bodnaru, A., & Tulbure, B. T. (2022). \"Give me a break!\" A systematic review and meta-analysis on the efficacy of micro-breaks for increasing well-being and performance. PLOS ONE, 17(8), e0272460.",u:"https://doi.org/10.1371/journal.pone.0272460"},
+  {id:8,t:"Doufesh, H., Ibrahim, F., Ismail, N. A., & Wan Ahmad, W. A. (2014). Effect of Muslim prayer (Salat) on alpha electroencephalography and its relationship with autonomic nervous system activity. Journal of Alternative and Complementary Medicine, 20(7), 558-562.",u:"https://dspace.alquds.edu/handle/20.500.12213/5006"},
+  {id:9,t:"Kahneman, D., & Deaton, A. (2010). High income improves evaluation of life but not emotional well-being. PNAS, 107(38), 16489-16493.",u:"https://doi.org/10.1073/pnas.1011492107"},
+  {id:10,t:"Killingsworth, M. A., Kahneman, D., & Mellers, B. (2023). Income and emotional well-being: A conflict resolved. PNAS, 120(10), e2208661120.",u:"https://doi.org/10.1073/pnas.2208661120"},
+  {id:11,t:"Whillans, A. V., Dunn, E. W., Smeets, P., Bekkers, R., & Norton, M. I. (2017). Buying time promotes happiness. PNAS, 114(32), 8523-8527.",u:"https://doi.org/10.1073/pnas.1706541114"},
+  {id:12,t:"Pega, F., et al. (2021). Global, regional, and national burdens of ischemic heart disease and stroke attributable to exposure to long working hours (WHO/ILO). Environment International, 154, 106595.",u:"https://doi.org/10.1016/j.envint.2021.106595"},
+  {id:13,t:"World Health Organization. (2019, May 28). Burn-out an \"occupational phenomenon\": International Classification of Diseases.",u:"https://www.who.int/news-room/detail/28-05-2019-burn-out-an-occupational-phenomenon-international-classification-of-diseases"},
+  {id:14,t:"Gallup. (2024). State of the Global Workplace: 2024 report.",u:"https://www.gallup.com/workplace/349484/state-of-the-global-workplace.aspx"},
+  {id:15,t:"Yousef, D. A. (2001). Islamic work ethic: A moderator between organizational commitment and job satisfaction in a cross-cultural context. Personnel Review, 30(2), 152-169.",u:"https://doi.org/10.1108/00483480110380325"},
+  {id:16,t:"Li, S., Stampfer, M. J., Williams, D. R., & VanderWeele, T. J. (2016). Association of religious service attendance with mortality among women. JAMA Internal Medicine, 176(6), 777-785.",u:"https://doi.org/10.1001/jamainternmed.2016.1615"},
+  {id:17,t:"Stiglitz, J. E., Sen, A., & Fitoussi, J.-P. (2009). Report by the Commission on the Measurement of Economic Performance and Social Progress; see also OECD (2018), Beyond GDP: Measuring what counts for economic and social performance.",u:"https://www.oecd.org/en/publications/beyond-gdp_9789264307292-en.html"},
+  {id:18,t:"Lewis, K., Stronge, W., Kellam, J., Kikuchi, L., Schor, J., Fan, W., Kelly, O., et al. (2023). The results are in: The UK's four-day week pilot. Autonomy / 4 Day Week Global.",u:"https://4dayweek.com/uk-pilot-results"},
+  {id:19,t:"Roky, R., Chapotot, F., Benchekroun, M. T., et al. (2003). Daytime sleepiness during Ramadan intermittent fasting: Polysomnographic and quantitative waking EEG study. Journal of Sleep Research, 12(2), 95-101.",u:"https://pubmed.ncbi.nlm.nih.gov/12753346/"},
+  {id:20,t:"BaHammam, A. S., et al. (2013). Ramadan fasting, sleep and daytime sleepiness in Muslim and non-Muslim men measured objectively. Journal of Research in Medical Sciences (PMC3724373).",u:"https://pmc.ncbi.nlm.nih.gov/articles/PMC3724373"},
+  {id:21,t:"The Quran 4:103 (prayer at fixed times), 62:9-10 (leave trade for Jumu'ah, then seek Allah's bounty), 24:37 (trade does not distract from remembrance).",u:"https://quran.com/4/103"}
+];
+const cite=(...ids)=>`<sup class="cite">${ids.map(i=>`<a href="#ref-${i}" data-act="cite" data-r="${i}">${i}</a>`).join(",")}</sup>`;
+const EV={strong:["Strong","var(--good)"],moderate:["Moderate","var(--contrib)"],emerging:["Emerging","var(--warn)"],design:["Design claim","var(--craft)"]};
+const evChip=k=>`<span class="ev-chip" style="--ev:${EV[k][1]}">${EV[k][0]}</span>`;
+const COMPARE=[
+  ["Origin and status",
+   `A technique from agile project planning. Zao-Sanders's analysis of online productivity advice ranked it first of 100 tips${cite(1)}, and his 2024 book expands it${cite(2)}. The ranking measures how often the tip is recommended, not a controlled test of results.`,
+   `Takes the same box-and-calendar method and fixes five daily anchors that cannot move: prayer at set times${cite(21)}, building on Muslim productivity frameworks that join spiritual, physical and social effort${cite(3)}.`,
+   `Timebox popularity is well documented; its outcome evidence is mostly indirect. No published trial of the Barakah design exists yet.`,"emerging"],
+  ["Definition of a good day",
+   `Planned boxes finished on time; output per hour. In commerce-first workplaces this usually rolls up to revenue, billable hours or deals closed.`,
+   `A dashboard of five parts: boxes completed, Salah fidelity, Top 3 priorities, focus quality and Creed-to-Commerce alignment (anchors kept, integrity checks, contribution).`,
+   `Measurement science supports dashboards over a single money metric: the Stiglitz-Sen-Fitoussi commission argued for moving from measuring output to measuring well-being${cite(17)}.`,"strong"],
+  ["Why planning works",
+   `Deciding when and where you will do a task turns an intention into a cue. Classic meta-analysis: d = 0.65 across 94 tests${cite(4)}.`,
+   `Same mechanism, plus five recurring cues per day (the adhan and prayer times) that prompt a review and a fresh plan.`,
+   `A newer meta-analysis of 642 tests finds smaller effects after correcting for publication bias (d = 0.15 to 0.35)${cite(5)}. Planning helps, but by less than older figures suggest.`,"moderate"],
+  ["Handling over-optimistic estimates",
+   `The box sets a time limit, but people still underestimate. Students predicted 34 days for a thesis and took 56; only about 30% finished by their own estimate${cite(6)}.`,
+   `Box Check at every prayer: drift is found within 2 to 4 hours, not at a weekly review, and unfinished boxes are re-planned in the next segment.`,
+   `The planning fallacy is well established. That five daily checkpoints reduce it is a reasonable design claim the app's data could test.`,"design"],
+  ["Breaks and recovery",
+   `Breaks are optional. Back-to-back boxes are common, especially in commerce-heavy days.`,
+   `Five mandatory pauses of 10 to 20 minutes, plus wudu, spread across the day. Small studies of Salat show higher alpha brain activity and parasympathetic (relaxation) markers${cite(8)}.`,
+   `Micro-break meta-analysis: more vigor (d = 0.36) and less fatigue (d = 0.35); overall performance gain not significant (d = 0.16)${cite(7)}. Salat studies are small (n = 9 to 30).`,"moderate"],
+  ["Money as the outcome",
+   `Higher earnings and efficiency are treated as the end result of good time use.`,
+   `Commerce is one pillar, kept honest by integrity checks; earnings are meant to flow on to family and contribution.`,
+   `Income does raise well-being for most people, without a hard ceiling, but for the least happy the gain stops near $100k${cite(9,10)}. Spending money to buy time raised happiness more than buying things${cite(11)}. Money matters, but it is a weak stand-in for a good life.`,"strong"],
+  ["Cost of overwork",
+   `Nothing in the method limits total hours; efficiency gains can simply be filled with more work.`,
+   `Prayer blocks break up long stretches and the evening ends at Isha, which caps continuous work and protects sleep.`,
+   `Working 55+ hours a week was linked to an estimated 745,000 deaths from stroke and heart disease in 2016${cite(12)}. WHO recognises burn-out as an occupational phenomenon${cite(13)}.`,"strong"],
+  ["Hours vs results",
+   `More time in boxes is assumed to mean more output.`,
+   `Fewer, better-protected boxes between anchors, with rest as a planned box.`,
+   `UK four-day-week pilot (61 firms): 71% of staff reported less burn-out, revenue was roughly flat (+1.4%), and 56 firms kept the schedule${cite(18)}.`,"moderate"],
+  ["Meaning and engagement",
+   `Motivation is assumed; the method organises tasks, not purpose.`,
+   `Daily niyyah (intention), a Contribution pillar and integrity checks connect each box to a reason beyond profit.`,
+   `Only 23% of employees worldwide are engaged, costing an estimated $8.9 trillion${cite(14)}. Islamic work ethic is linked with higher commitment and job satisfaction${cite(15)}.`,"moderate"],
+  ["Health and community",
+   `Out of scope.`,
+   `Jama'ah prayer, family (Care) boxes and Contribution boxes are scored.`,
+   `Women attending religious services more than weekly had 33% lower mortality over 16 years${cite(16)}. Observational, so it shows association, not cause.`,"emerging"],
+  ["Sleep and the night",
+   `The well-known CEO routines start very early but do not plan the night.`,
+   `Tahajjud in the last third of the night, paired with sleeping soon after Isha and a short midday rest.`,
+   `Ramadan sleep studies disagree: some find shorter sleep and more daytime sleepiness, others find no objective sleepiness${cite(19,20)}. Night prayer needs early bedtimes to avoid sleep debt.`,"emerging"]
+];
+function efficiencyLens(k){
+  const day=S.days[k];if(!day)return null;const s=dayStats(k);if(s.comps.box==null)return null;
+  const cp=s.byP.commerce.plan,deliv=cp?s.byP.commerce.done/cp:null;
+  return Math.round((deliv==null?s.comps.box:.6*s.comps.box+.4*deliv)*100);
+}
+function vEvidence(){
+  const k=viewKey,days=[...Array(7)].map((_,i)=>addDays(k,i-6));
+  const rows=days.map(d=>({d,eff:efficiencyLens(d),bar:S.days[d]?dayStats(d).score:null}));
+  const avg=a=>{const v=a.filter(x=>x!=null);return v.length?Math.round(v.reduce((p,c)=>p+c,0)/v.length):null};
+  const effAvg=avg(rows.map(r=>r.eff)),barAvg=avg(rows.map(r=>r.bar));
+  return`<div class="grid">
+  <section class="card thesis"><div class="eyebrow" style="color:#fde68a">Evidence review · ${REFS.length} sources</div>
+    <h2>Two ways to measure a successful day</h2>
+    <p>Conventional timeboxing asks one question: did the box get done in its time? In commerce-first workplaces that answer is then rolled up into money and efficiency. The Barakah Time Box keeps the box but measures the day as a whole: worship, focus, priorities, integrity, health and contribution.</p>
+    <p class="q">Editor's note: timeboxing itself does not measure money. The money-and-efficiency lens comes from the work culture it is usually used in. The comparison below is between that lens and the Barakah lens, so the contention is tested fairly.</p></section>
+
+  <section class="card"><div class="card-h"><div><div class="eyebrow">Compare and contrast</div><h2>Timebox vs Barakah Time Box</h2></div>
+    <div class="legend">${Object.keys(EV).map(x=>evChip(x)).join("")}</div></div>
+    <div class="tablewrap"><table class="evt"><thead><tr><th>Dimension</th><th>Conventional Timebox<br><span class="muted">latest findings</span></th><th>Barakah Time Box</th><th>What the research says</th></tr></thead><tbody>
+    ${COMPARE.map(r=>`<tr><th scope="row">${r[0]}</th><td>${r[1]}</td><td class="bar-col">${r[2]}</td><td>${r[3]}<div style="margin-top:6px">${evChip(r[4])}</div></td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="muted" style="font-size:.8rem;margin-bottom:0">Evidence labels: Strong = large studies or meta-analyses agree. Moderate = meta-analyses with small or mixed effects, or large surveys. Emerging = small or observational studies. Design claim = follows from established findings but has not been tested for this app.</p>
+  </section>
+
+  <div class="grid g-dash">
+  <section class="card span-6"><div class="eyebrow">Where the contention holds</div><h2 style="margin-bottom:8px">Supported by the evidence</h2>
+    <ul class="ev-list">
+      <li>Money is an incomplete measure of a good life; well-being researchers recommend several indicators instead of one${cite(9,10,17)}.</li>
+      <li>Unlimited efficiency carries real health costs; long hours and burn-out are documented harms${cite(12,13)}.</li>
+      <li>Regular short breaks restore energy and reduce fatigue${cite(7)}, which the five prayers build in by design.</li>
+      <li>Shorter, protected work schedules can hold revenue steady while lowering burn-out${cite(18)}.</li>
+    </ul></section>
+  <section class="card span-6"><div class="eyebrow">Where it needs your data</div><h2 style="margin-bottom:8px">Still to be tested</h2>
+    <ul class="ev-list">
+      <li>No study has yet compared a prayer-anchored timebox with a standard one. The app's daily records could provide that.</li>
+      <li>Salat physiology studies are small (9 to 30 people) and partly reflect posture, not only prayer${cite(8)}.</li>
+      <li>Religion and health studies are observational and cannot prove cause${cite(16)}.</li>
+      <li>Night prayer can cost sleep unless bedtime moves earlier${cite(19,20)}.</li>
+      <li>The best-known timeboxing ranking measures popularity, not effectiveness${cite(1)}.</li>
+    </ul></section>
+
+  <section class="card span-12"><div class="card-h"><div><div class="eyebrow">Draft for your scoring tab</div><h2>The same week under both lenses</h2></div>
+    <div class="row"><span class="kpi-inline"><b class="num" style="color:var(--commerce)">${effAvg??"–"}</b> Efficiency lens avg</span><span class="kpi-inline"><b class="num" style="color:var(--creed)">${barAvg??"–"}</b> Barakah score avg</span></div></div>
+    ${duoSvg(rows)}
+    <div class="legend" style="margin-top:6px"><span><i class="dot" style="background:var(--commerce)"></i>Efficiency lens = 60% boxes completed + 40% commerce hours delivered vs planned</span><span><i class="dot" style="background:var(--creed)"></i>Barakah score = boxes, Salah, priorities, focus, plus Sunnah bonus</span></div>
+    <p class="muted" style="font-size:.82rem;margin-bottom:0">This is a starting formula so you can see the two models diverge on real days. A day can score high on efficiency while missing prayers, or lower on efficiency while being well balanced. Replace the weights when you build the scoring tab.</p>
+  </section></div>
+
+  <section class="card" id="refs"><div class="eyebrow">References</div><h2 style="margin-bottom:10px">Sources cited</h2>
+    <ol class="refs">${REFS.map(r=>`<li id="ref-${r.id}">${esc(r.t)} <a href="${r.u}" target="_blank" rel="noopener">Link</a></li>`).join("")}</ol>
+    <p class="muted" style="font-size:.8rem;margin-bottom:0">Figures were checked against publisher pages, abstracts or reputable summaries in November 2026. Reference 5 is linked to a scholar search because its final journal details could not be confirmed; check it before you publish findings.</p>
+  </section></div>`;
+}
+function duoSvg(rows){
+  const W2=640,H=200,L=30,B=24,T=12,cw=(W2-L-6)/rows.length,y=v=>T+(H-T-B)*(1-v/100);
+  let g="";for(const v of[0,25,50,75,100])g+=`<line x1="${L}" x2="${W2-4}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="var(--muted)">${v}</text>`;
+  let b="";rows.forEach((r,i)=>{const x=L+i*cw+cw*.18,w=cw*.3;
+    if(r.eff!=null)b+=`<rect x="${x}" y="${y(r.eff)}" width="${w}" height="${H-B-y(r.eff)}" rx="4" fill="var(--commerce)"/><text x="${x+w/2}" y="${y(r.eff)-3}" text-anchor="middle" font-size="9.5" fill="var(--ink)">${r.eff}</text>`;
+    if(r.bar!=null)b+=`<rect x="${x+w+3}" y="${y(r.bar)}" width="${w}" height="${H-B-y(r.bar)}" rx="4" fill="var(--creed)"/><text x="${x+w*1.5+3}" y="${y(r.bar)-3}" text-anchor="middle" font-size="9.5" fill="var(--ink)">${r.bar}</text>`;
+    b+=`<text x="${x+w+1.5}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--muted)">${dateOf(r.d).toLocaleDateString(undefined,{weekday:"short"})}</text>`});
+  return`<svg viewBox="0 0 ${W2} ${H}" style="width:100%;height:auto" role="img" aria-label="Efficiency lens and Barakah score for the last seven days">${g}${b}</svg>`;
+}
+
+/* ---- Reports ---- */
+let repRange=7;
+function rangeKeys(n){return[...Array(n)].map((_,i)=>addDays(viewKey,i-n+1))}
+function vReports(){
+  const keys=rangeKeys(repRange),stats=keys.map(k=>({k,s:S.days[k]?dayStats(k):null}));
+  const scored=stats.filter(x=>x.s&&x.s.score!=null),avg=scored.length?Math.round(scored.reduce((a,x)=>a+x.s.score,0)/scored.length):null;
+  const tot=stats.reduce((a,x)=>{if(x.s){a.boxes+=x.s.boxes;a.done+=x.s.done;a.pr+=x.s.prayersOk;a.creed+=x.s.creedMin;a.com+=x.s.commerceMin}return a},{boxes:0,done:0,pr:0,creed:0,com:0});
+  const best=scored.slice().sort((a,b)=>b.s.score-a.s.score)[0];
+  return`<div class="grid">
+  <section class="card"><div class="card-h"><div><div class="eyebrow">Reports</div><h2>Productivity report</h2></div>
+    <div class="row"><div class="seg" role="group" aria-label="Report range">${[[1,"Day"],[7,"7 days"],[30,"30 days"]].map(([n,l])=>`<button data-act="range" data-n="${n}" class="${repRange===n?"on":""}" style="${repRange===n?"background:var(--indigo);color:#fff":""}">${l}</button>`).join("")}</div>
+    <button class="btn primary" data-act="pdf">${I.pdf} Download PDF report</button></div></div>
+    <div class="kpis">
+      <div class="kpi"><b class="num" style="color:${scoreColor(avg)}">${avg??"–"}</b><span>Average score</span></div>
+      <div class="kpi"><b class="num">${tot.done}/${tot.boxes}</b><span>Boxes completed</span></div>
+      <div class="kpi"><b class="num">${tot.pr}</b><span>Prayers on time or in jama'ah</span></div>
+      <div class="kpi"><b class="num">${durTxt(Math.round(tot.creed))}</b><span>Creed time</span></div>
+      <div class="kpi"><b class="num">${durTxt(Math.round(tot.com))}</b><span>Commerce time</span></div>
+      <div class="kpi"><b class="num">${best?esc(dateOf(best.k).toLocaleDateString(undefined,{weekday:"short",day:"numeric"})):"–"}</b><span>Best day${best?" ("+best.s.score+")":""}</span></div>
+    </div>
+    <div class="tablewrap" style="margin-top:14px"><table class="rep-table num"><thead><tr><th>Date</th><th>Score</th><th>Grade</th><th>Boxes</th><th>Salah</th><th>Priorities</th><th>Focus</th><th>Alignment</th></tr></thead><tbody>
+    ${stats.slice().reverse().map(({k,s})=>`<tr><td>${esc(shortDate(k))}</td>${s?`<td><span class="scorepill" style="background:${scoreColor(s.score)}">${s.score??"–"}</span></td><td>${s.grade[0]}</td><td>${s.done}/${s.boxes}</td><td>${pct(s.comps.salah)}</td><td>${pct(s.comps.prio)}</td><td>${pct(s.comps.focus)}</td><td>${s.alignment??"–"}</td>`:`<td colspan="7" class="muted">No data</td>`}</tr>`).join("")}</tbody></table></div>
+    <p class="muted" style="font-size:.8rem;margin-bottom:0">Score = Boxes 35% + Salah 30% + Priorities 20% + Focus 15% (re-weighted when a part has no data yet) + 5 for Tahajjud + 3 for Duha, capped at 100.</p>
+  </section>
+  <section class="card"><div class="card-h"><div><div class="eyebrow">Data</div><h2>Manage your data</h2></div></div>
+    <div class="row">
+      ${hasSample()?`<button class="btn gold" data-act="askRemoveSample">${I.trash} Remove sample data</button>`:`<button class="btn" data-act="loadSample">Load sample data</button>`}
+      <button class="btn" data-act="exportJson">${I.dl} Export backup (JSON)</button>
+      <button class="btn" data-act="exportCsv">${I.dl} Export boxes (CSV)</button>
+      <button class="btn" data-act="importJson">${I.up} Import backup</button>
+      <button class="btn danger" data-act="askReset">${I.trash} Erase everything</button>
+    </div>
+    <p class="muted" style="font-size:.82rem;margin-bottom:0">${dbApi?"Your plans are saved privately to your account and on this device.":"Your plans are saved in this browser."} Remove sample data deletes only the example items and keeps everything you added.</p>
+  </section></div>`;
+}
+
+/* ---- Setup ---- */
+function vSetup(){const s=S.settings;
+  return`<div class="grid"><section class="card"><div class="eyebrow">Prayer times</div><h2 style="margin-bottom:12px">Location and calculation</h2>
+  <div class="form-grid">
+    <label class="f">City<select id="setCity" data-set="city"><option value="">Custom coordinates</option>${CITIES.map(c=>`<option ${c[0]===s.city?"selected":""}>${c[0]}</option>`).join("")}</select></label>
+    <label class="f">Latitude<input type="number" step="0.0001" id="setLat" data-set="lat" value="${s.lat}"></label>
+    <label class="f">Longitude<input type="number" step="0.0001" id="setLng" data-set="lng" value="${s.lng}"></label>
+    <label class="f">Calculation method<select id="setMethod" data-set="method">${Object.entries(METHODS).map(([v,m])=>`<option value="${v}" ${v===s.method?"selected":""}>${m.name}</option>`).join("")}</select></label>
+    <label class="f">Asr<select id="setAsr" data-set="asr"><option value="standard" ${s.asr==="standard"?"selected":""}>Standard (Shafi'i, Maliki, Hanbali)</option><option value="hanafi" ${s.asr==="hanafi"?"selected":""}>Hanafi</option></select></label>
+  </div>
+  <div class="row" style="margin-top:12px"><button class="btn" data-act="geo">Use my location</button><span class="muted" style="font-size:.82rem">Times use this device's time zone. Check them against your local masjid timetable.</span></div>
+  </section>
+  <section class="card"><div class="eyebrow">Time Box</div><h2 style="margin-bottom:12px">How prayers block your calendar</h2>
+  <div class="form-grid">
+    <label class="f">Wudu and preparation buffer (min)<input type="number" min="0" max="30" id="setWudu" data-set="wudu" value="${s.wudu}"></label>
+    ${FARD.map(p=>`<label class="f">${PNAME[p]} block (min)<input type="number" min="5" max="90" id="setDur-${p}" data-set="dur.${p}" value="${s.dur[p]}"></label>`).join("")}
+    <label class="f">Jumu'ah block (min)<input type="number" min="20" max="120" id="setJum" data-set="jumuahDur" value="${s.jumuahDur}"></label>
+    <label class="f">Clock<select id="setClock" data-set="h24"><option value="false" ${!s.h24?"selected":""}>12-hour</option><option value="true" ${s.h24?"selected":""}>24-hour</option></select></label>
+    <label class="f">Theme<select id="setTheme" data-set="theme"><option value="auto" ${s.theme==="auto"?"selected":""}>Match system</option><option value="light" ${s.theme==="light"?"selected":""}>Light</option><option value="dark" ${s.theme==="dark"?"selected":""}>Dark</option></select></label>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <label class="btn"><input type="checkbox" id="setJ" data-set="jumuah" ${s.jumuah?"checked":""}> Replace Dhuhr with Jumu'ah on Fridays</label>
+    <label class="btn"><input type="checkbox" id="setT" data-set="tahajjud" ${s.tahajjud?"checked":""}> Reserve a Tahajjud box</label>
+    <label class="btn"><input type="checkbox" id="setD" data-set="duha" ${s.duha?"checked":""}> Reserve a Duha box</label>
+  </div></section></div>`;
+}
+
+/* ---------- modal / toast ---------- */
+function toast(msg){const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+function modal(html){closeModal();const b=document.createElement("div");b.className="modal-back";b.id="modalBack";b.innerHTML=`<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
+  b.addEventListener("click",e=>{if(e.target===b)closeModal()});document.body.appendChild(b);const f=b.querySelector("input,button");if(f)f.focus();return b}
+function closeModal(){const m=$("#modalBack");if(m)m.remove()}
+function confirmBox(title,body,label,fn,danger){const m=modal(`<h2>${title}</h2><p class="muted">${body}</p><div class="row" style="justify-content:flex-end"><button class="btn" data-x="no">Cancel</button><button class="btn ${danger?"danger":"gold"}" data-x="yes">${label}</button></div>`);
+  m.querySelector('[data-x="no"]').onclick=closeModal;m.querySelector('[data-x="yes"]').onclick=()=>{closeModal();fn()}}
+function openBox(b,startMin){
+  const k=viewKey,isNew=!b;const t=prayerTimes(k);
+  b=b||{id:uid(),title:"",pillar:"commerce",start:startMin??findFree(k,60,startFrom(k))??t.fajr+30,dur:60,status:"pending",focus:0,priority:false,note:""};
+  let pillar=b.pillar;
+  const m=modal(`<h2>${isNew?"New time box":"Edit time box"}</h2>
+  <form id="boxForm" style="display:grid;gap:12px">
+    <label class="f">Title<input type="text" id="bTitle" value="${esc(b.title)}" placeholder="What will you do in this box?" required></label>
+    <div><div class="eyebrow" style="margin-bottom:6px">Pillar</div><div class="pillar-pick">${Object.entries(PILLARS).map(([v,p])=>`<button type="button" class="${p.cls} ${v===pillar?"on":""}" data-pill="${v}"><i class="dot pc-dot"></i>${p.name}</button>`).join("")}</div></div>
+    <div class="form-grid"><label class="f">Start<input type="time" id="bStart" step="900" value="${hhmm(b.start)}"></label>
+      <label class="f">Length<select id="bDur">${[15,20,30,45,60,75,90,120,150,180,240].map(d=>`<option value="${d}" ${d===b.dur?"selected":""}>${durTxt(d)}</option>`).join("")}${[15,20,30,45,60,75,90,120,150,180,240].includes(b.dur)?"":`<option selected value="${b.dur}">${durTxt(b.dur)}</option>`}</select></label></div>
+    <label class="row" style="gap:8px"><input type="checkbox" id="bPrio" ${b.priority?"checked":""}> Mark as a top-priority box <span class="star" style="color:var(--gold)">★</span></label>
+    <label class="f">Notes<textarea id="bNote" rows="2">${esc(b.note)}</textarea></label>
+    ${isNew?"":`<div><div class="eyebrow" style="margin-bottom:6px">Box check</div><div class="row">${statusSeg(b)}${starsHtml(b)}</div></div>`}
+    <p id="bWarn" class="muted" style="margin:0;font-size:.82rem"></p>
+    <div class="row" style="justify-content:space-between">${isNew?"<span></span>":`<button type="button" class="btn danger" id="bDel">${I.trash} Delete</button>`}<div class="row"><button type="button" class="btn" id="bCancel">Cancel</button><button class="btn primary" type="submit">${isNew?"Add box":"Save"}</button></div></div>
+  </form>`);
+  const warn=()=>{const c=conflictOf(k,{start:parseHM($("#bStart").value),dur:+$("#bDur").value});$("#bWarn").innerHTML=c?`<b style="color:var(--bad)">This overlaps ${PNAME[c.key]} (${fmt(c.start)} – ${fmt(c.start+c.dur)}).</b> It will be flagged until you move it.`:""};
+  warn();$("#bStart").addEventListener("change",warn);$("#bDur").addEventListener("change",warn);
+  m.querySelectorAll("[data-pill]").forEach(x=>x.onclick=()=>{pillar=x.dataset.pill;m.querySelectorAll("[data-pill]").forEach(y=>y.classList.toggle("on",y===x))});
+  $("#bCancel").onclick=closeModal;
+  if(!isNew)$("#bDel").onclick=()=>{const d=getDay(k);d.boxes=d.boxes.filter(x=>x.id!==b.id);touch(k);closeModal();render();toast("Box deleted")};
+  $("#boxForm").addEventListener("submit",e=>{e.preventDefault();const title=$("#bTitle").value.trim();if(!title){$("#bTitle").focus();return}
+    Object.assign(b,{title,pillar,start:parseHM($("#bStart").value),dur:+$("#bDur").value,priority:$("#bPrio").checked,note:$("#bNote").value});
+    const d=getDay(k);if(isNew)d.boxes.push(b);touch(k);closeModal();render();toast(isNew?"Box added":"Box saved")});
+}
+
+/* ---------- PDF report ---------- */
+function hexRgb(h){h=h.replace("#","");return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
+const ascii=s=>String(s||"").replace(/[–—]/g,"-").replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[^\x20-\x7E]/g,"");
+async function makePdf(){
+  if(!window.jspdf){toast("The PDF library did not load. Check your connection and try again.");return}
+  const {jsPDF}=window.jspdf,doc=new jsPDF({unit:"mm",format:"a4"}),W=210,M=14;let y=0;
+  const keys=rangeKeys(repRange),stats=keys.map(k=>({k,s:S.days[k]?dayStats(k):null}));
+  const scored=stats.filter(x=>x.s&&x.s.score!=null),avg=scored.length?Math.round(scored.reduce((a,x)=>a+x.s.score,0)/scored.length):null;
+  const need=h=>{if(y+h>284){doc.addPage();y=16}};
+  const fill=c=>doc.setFillColor(...hexRgb(c)),txt=c=>doc.setTextColor(...hexRgb(c));
+  // header
+  fill("#0f766e");doc.rect(0,0,W,38,"F");fill("#4c1d95");doc.rect(W*0.62,0,W*0.38,38,"F");fill("#f5b301");doc.rect(0,38,W,2,"F");
+  txt("#ffffff");doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text("Barakah Time Box Report",M,17);
+  doc.setFont("helvetica","normal");doc.setFontSize(10);
+  doc.text(ascii(`${repRange===1?longDate(viewKey):shortDate(keys[0])+" to "+shortDate(keys[keys.length-1])}  |  ${S.settings.city}  |  ${METHODS[S.settings.method].name}`),M,25);
+  doc.text(ascii("Generated "+new Date().toLocaleString()),M,31);
+  y=50;
+  // summary tiles
+  const tot=stats.reduce((a,x)=>{if(x.s){a.b+=x.s.boxes;a.d+=x.s.done;a.p+=x.s.prayersOk;a.al+=x.s.alignment||0;a.n++}return a},{b:0,d:0,p:0,al:0,n:0});
+  const tiles=[["Average score",avg??"-","#4338ca"],["Boxes done",tot.d+"/"+tot.b,"#e39b06"],["Prayers on time",String(tot.p),"#0f9d76"],["Avg alignment",tot.n?Math.round(tot.al/tot.n):"-","#0a95d6"]];
+  const tw=(W-2*M-9)/4;tiles.forEach((t,i)=>{const x=M+i*(tw+3);fill(t[2]);doc.roundedRect(x,y,tw,22,3,3,"F");txt("#ffffff");doc.setFontSize(8);doc.text(t[0].toUpperCase(),x+4,y+7);doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(String(t[1]),x+4,y+17);doc.setFont("helvetica","normal")});
+  y+=32;
+  // daily table
+  txt("#141833");doc.setFont("helvetica","bold");doc.setFontSize(12);doc.text("Daily summary",M,y);y+=6;
+  const cols=[["Date",34],["Score",18],["Grade",28],["Boxes",20],["Salah",20],["Priorities",22],["Focus",18],["Align",22]];
+  const head=()=>{fill("#eef0fa");doc.rect(M,y-4.5,W-2*M,7,"F");doc.setFontSize(8.5);doc.setFont("helvetica","bold");txt("#5d6385");let x=M+2;cols.forEach(c=>{doc.text(c[0],x,y);x+=c[1]});y+=7;doc.setFont("helvetica","normal");txt("#141833")};
+  head();
+  const pc=v=>v==null?"-":Math.round(v*100)+"%";
+  for(const {k,s} of stats){need(7);if(y===16)head();let x=M+2;const vals=s?[shortDate(k),s.score??"-",s.grade[0],s.done+"/"+s.boxes,pc(s.comps.salah),pc(s.comps.prio),pc(s.comps.focus),s.alignment??"-"]:[shortDate(k),"-","No data","","","","",""];
+    vals.forEach((v,i)=>{if(i===1&&s&&s.score!=null){const c=s.score>=75?"#12a150":s.score>=50?"#e08a00":"#e0413a";fill(c);doc.roundedRect(x-1,y-3.8,12,5.2,2,2,"F");txt("#ffffff");doc.setFont("helvetica","bold");doc.text(String(v),x+1,y);doc.setFont("helvetica","normal");txt("#141833")}else doc.text(ascii(String(v)),x,y);x+=cols[i][1]});
+    doc.setDrawColor(226,229,241);doc.line(M,y+2,W-M,y+2);y+=7}
+  y+=4;
+  // pillar totals
+  need(40);doc.setFont("helvetica","bold");doc.setFontSize(12);doc.text("Time by pillar (completed)",M,y);y+=6;
+  const pt={};for(const p in PILLARS)pt[p]=0;stats.forEach(({s})=>{if(s)for(const p in PILLARS)pt[p]+=s.byP[p].done});
+  const maxP=Math.max(1,...Object.values(pt));doc.setFontSize(9);doc.setFont("helvetica","normal");
+  for(const p in PILLARS){need(7);txt("#141833");doc.text(PILLARS[p].name,M,y);fill("#eef0fa");doc.roundedRect(M+30,y-3.5,120,4.5,2,2,"F");fill(PILLARS[p].hex);doc.roundedRect(M+30,y-3.5,Math.max(1,120*pt[p]/maxP),4.5,2,2,"F");doc.text(durTxt(Math.round(pt[p])),M+154,y);y+=7}
+  y+=4;
+  // day details
+  const detailKeys=stats.filter(x=>x.s).map(x=>x.k).slice(-(repRange===30?7:repRange)).reverse();
+  for(const k of detailKeys){const d=S.days[k],s=dayStats(k),t=prayerTimes(k);
+    need(30);fill("#0f766e");doc.roundedRect(M,y-5,W-2*M,8,2,2,"F");txt("#ffffff");doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text(ascii(longDate(k)+"   Score "+(s.score??"-")+"  "+s.grade[0]),M+3,y);y+=8;
+    txt("#141833");doc.setFontSize(9);doc.setFont("helvetica","normal");
+    if(d.intention){need(6);doc.setFont("helvetica","italic");doc.text(doc.splitTextToSize(ascii("Intention: "+d.intention),W-2*M),M,y);y+=6;doc.setFont("helvetica","normal")}
+    need(6);doc.text(ascii("Salah: "+FARD.map(p=>PNAME[p]+" "+fmt(t[p])+" "+(PSTAT.find(x=>x[0]===d.prayers[p])||["","not logged"])[1]).join("  |  ")),M,y,{maxWidth:W-2*M});y+=d.prayers?10:6;
+    need(6);doc.text(ascii("Night & voluntary: Tahajjud "+(d.nafl.tahajjud?"yes":"no")+"  |  Duha "+(d.nafl.duha?"yes":"no")+"  |  Integrity checks "+CONDUCT.filter(c=>d.conduct[c[0]]).length+"/5"),M,y);y+=6;
+    const pr=d.priorities.filter(p=>p.t.trim());if(pr.length){need(6);doc.text(ascii("Priorities: "+pr.map(p=>(p.d?"[x] ":"[ ] ")+p.t).join("   ")),M,y,{maxWidth:W-2*M});y+=pr.length>1?10:6}
+    for(const b of d.boxes.slice().sort((a,c)=>a.start-c.start)){need(6);fill(PILLARS[b.pillar].hex);doc.circle(M+1.5,y-1.2,1.3,"F");
+      const sc={done:"#12a150",partial:"#e08a00",missed:"#e0413a",pending:"#9aa0bd"}[b.status];
+      doc.text(ascii(fmt(b.start)+"-"+fmt(b.start+b.dur)),M+5,y);doc.text(doc.splitTextToSize(ascii((b.priority?"* ":"")+b.title),100)[0],M+42,y);
+      txt(sc);doc.setFont("helvetica","bold");doc.text(b.status.toUpperCase(),M+148,y);doc.setFont("helvetica","normal");txt("#141833");doc.text(b.focus?("Focus "+b.focus+"/5"):"",M+168,y);y+=5.5}
+    if(d.reflection){need(8);doc.setFont("helvetica","italic");const lines=doc.splitTextToSize(ascii("Reflection: "+d.reflection),W-2*M);need(lines.length*4.5);doc.text(lines,M,y);y+=lines.length*4.5;doc.setFont("helvetica","normal")}
+    y+=6}
+  // footer
+  const n=doc.getNumberOfPages();for(let i=1;i<=n;i++){doc.setPage(i);doc.setFontSize(8);txt("#5d6385");doc.text("Score = Boxes 35% + Salah 30% + Priorities 20% + Focus 15% + Tahajjud 5 + Duha 3 (max 100)",M,292);doc.text(i+"/"+n,W-M,292,{align:"right"})}
+  const name="barakah-timebox-"+(repRange===1?viewKey:keys[0]+"-to-"+keys[keys.length-1])+".pdf";
+  await deliver(name,doc.output("blob"),()=>doc.save(name));
+}
+async function deliver(filename,blob,fallback){
+  try{const dl=window.claude&&window.claude.use?await window.claude.use("downloads"):null;
+    if(dl){try{await dl.save({filename,data:blob});toast("Saved "+filename)}catch(e){if(e&&e.code!=="declined")toast("Could not save the file here ("+(e.code||"error")+").")}return}}catch(e){}
+  try{if(fallback)fallback();else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}toast("Downloaded "+filename)}catch(e){toast("Downloads are blocked in this view.")}
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-act]");if(!el)return;const a=el.dataset.act,k=viewKey;
+  const findBox=id=>getDay(k).boxes.find(b=>b.id===id);
+  switch(a){
+    case"day":viewKey=addDays(viewKey,+el.dataset.d);render();break;
+    case"today":viewKey=todayKey();render();break;
+    case"theme":{const order=["auto","light","dark"];S.settings.theme=order[(order.indexOf(S.settings.theme)+1)%3];applyTheme();dirtySettings=true;save();toast("Theme: "+({auto:"match system",light:"light",dark:"dark"})[S.settings.theme]);if(route==="setup")render();break}
+    case"bstatus":{const b=findBox(el.dataset.id);if(!b)return;b.status=b.status===el.dataset.v?"pending":el.dataset.v;if(b.status==="missed")b.focus=0;touch(k);if($("#modalBack")){el.parentElement.querySelectorAll("button").forEach(x=>{x.classList.toggle("on",x.dataset.v===b.status)});} render2();break}
+    case"bfocus":{const b=findBox(el.dataset.id);if(!b)return;b.focus=b.focus===+el.dataset.v?0:+el.dataset.v;touch(k);if($("#modalBack"))el.parentElement.querySelectorAll("button").forEach(x=>x.classList.toggle("on",+x.dataset.v<=b.focus));render2();break}
+    case"prioDone":getDay(k).priorities[+el.dataset.i].d=el.checked;touch(k,true);render();break;
+    case"pstat":{const d=getDay(k),p=el.dataset.p;d.prayers[p]=d.prayers[p]===el.dataset.v?undefined:el.dataset.v;if(!d.prayers[p])delete d.prayers[p];touch(k,true);render();break}
+    case"nafl":getDay(k).nafl[el.dataset.n]=el.checked;touch(k,true);render();break;
+    case"conduct":getDay(k).conduct[el.dataset.c]=el.checked;touch(k,true);render();break;
+    case"newBox":openBox(null);break;
+    case"boxit":{const x=getDay(k).dump.find(d=>d.id===el.dataset.id);if(x)placeDump(x,startFrom(k),false);break}
+    case"delDump":{const d=getDay(k);d.dump=d.dump.filter(x=>x.id!==el.dataset.id);touch(k);render();break}
+    case"autobox":{const d=getDay(k),boxed=new Set(d.boxes.map(b=>b.fromDump));const todo=d.dump.filter(x=>!boxed.has(x.id));if(!todo.length){toast("Everything in the brain dump is already boxed");break}
+      const order=["commerce","craft","creed","contrib","care"];todo.sort((a,b)=>order.indexOf(a.pillar)-order.indexOf(b.pillar));let n=0;
+      for(const x of todo){const st=findFree(k,x.est,startFrom(k));if(st==null)break;d.boxes.push({id:uid(),title:x.text,pillar:x.pillar,start:st,dur:x.est,status:"pending",focus:0,priority:false,note:"",fromDump:x.id,sample:x.sample||undefined});n++}
+      touch(k);render();toast(n?`Boxed ${n} task${n>1?"s":""} around your prayers`:"No free time left today");break}
+    case"fixAll":{const d=getDay(k);let n=0;for(const b of d.boxes){const c=conflictOf(k,b);if(c){const st=findFree(k,b.dur,c.start+c.dur,b.id);if(st!=null){b.start=st;n++}}}touch(k);render();toast(`Moved ${n} box${n===1?"":"es"} out of prayer time`);break}
+    case"askRemoveSample":confirmBox("Remove sample data?","This deletes the seven example days and example tasks. Anything you added yourself stays.","Remove sample data",()=>{removeSample();render();toast("Sample data removed")});break;
+    case"loadSample":{seedSample();S.settings.sampleDismissed=false;dirtySettings=true;Object.keys(S.days).forEach(x=>dirty.add(x));save();render();toast("Sample data loaded");break}
+    case"askReset":confirmBox("Erase everything?","All boxes, prayers, notes and settings will be deleted from this device"+(dbApi?" and your account":"")+". This cannot be undone.","Erase everything",()=>{Object.keys(S.days).forEach(x=>dirty.add(x));S.days={};S.settings=Object.assign(defaultSettings(),{seeded:true,sampleDismissed:true});dirtySettings=true;save();applyTheme();render();toast("All data erased")},true);break;
+    case"cite":{e.preventDefault();const t=document.getElementById("ref-"+el.dataset.r);if(t){t.scrollIntoView({behavior:"smooth",block:"center"});t.style.background="color-mix(in srgb,var(--gold) 22%,transparent)";setTimeout(()=>t.style.background="",1800)}break}
+    case"range":repRange=+el.dataset.n;render();break;
+    case"pdf":makePdf();break;
+    case"exportJson":deliver("barakah-timebox-backup-"+todayKey()+".json",new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));break;
+    case"exportCsv":{const rows=[["date","start","end","title","pillar","status","focus","priority"]];Object.keys(S.days).sort().forEach(d=>S.days[d].boxes.forEach(b=>rows.push([d,hhmm(b.start),hhmm(b.start+b.dur),b.title,PILLARS[b.pillar].name,b.status,b.focus,b.priority?"yes":"no"])));
+      deliver("barakah-timebox-boxes.csv",new Blob([rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n")],{type:"text/csv"}));break}
+    case"importJson":$("#importFile").click();break;
+    case"geo":{if(!navigator.geolocation){toast("Location is not available here. Enter coordinates instead.");break}
+      navigator.geolocation.getCurrentPosition(p=>{Object.assign(S.settings,{lat:+p.coords.latitude.toFixed(4),lng:+p.coords.longitude.toFixed(4),city:"",guessed:false});dirtySettings=true;save();render();toast("Location set")},()=>toast("Location is blocked here. Pick a city or enter coordinates."));break}
+  }
+});
+function render2(){if($("#modalBack")){const m=$("#modalBack");m.remove();render();document.body.appendChild(m)}else render()}
+document.addEventListener("submit",e=>{if(e.target.id==="dumpForm"){e.preventDefault();const t=$("#dumpText").value.trim();if(!t)return;getDay(viewKey).dump.unshift({id:uid(),text:t,pillar:$("#dumpPillar").value,est:+$("#dumpEst").value});touch(viewKey);render();$("#dumpText").focus()}});
+document.addEventListener("input",e=>{const el=e.target;if(!el.dataset.bind)return;const d=getDay(viewKey);
+  if(el.dataset.bind==="prio")d.priorities[+el.dataset.i].t=el.value;else d[el.dataset.bind]=el.value;d.touched=true;dirty.add(viewKey);save()});
+document.addEventListener("change",e=>{const el=e.target,p=el.dataset.set;if(!p)return;const s=S.settings;let v=el.type==="checkbox"?el.checked:el.value;
+  if(p==="city"){const c=CITIES.find(c=>c[0]===v);if(c)Object.assign(s,{city:c[0],lat:c[1],lng:c[2],method:c[3]});else s.city="";s.guessed=false}
+  else if(p==="lat"||p==="lng"){s[p]=+v;s.city="";s.guessed=false}
+  else if(p.startsWith("dur."))s.dur[p.slice(4)]=+v;
+  else if(p==="h24")s.h24=v==="true";
+  else if(["wudu","jumuahDur"].includes(p))s[p]=+v;
+  else s[p]=v;
+  dirtySettings=true;save();applyTheme();render();toast("Settings saved")});
+$("#importFile").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o.settings||!o.days)throw 0;S.settings=Object.assign(defaultSettings(),o.settings);S.days=o.days;dirtySettings=true;Object.keys(S.days).forEach(k=>dirty.add(k));save();applyTheme();render();toast("Backup imported")}catch(err){toast("That file is not a Barakah Time Box backup.")}};r.readAsText(f);e.target.value=""});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+function applyTheme(){const t=S.settings.theme;if(t==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t)}
+function onRoute(){const h=location.hash.slice(1);route=["dashboard","timebox","salah","model","evidence","reports","setup"].includes(h)?h:"dashboard";render();window.scrollTo(0,0)}
+window.addEventListener("hashchange",onRoute);
+
+/* ---------- boot ---------- */
+const had=loadLocal();
+if(!had||(!S.settings.seeded&&!S.settings.sampleDismissed))seedSample();
+applyTheme();onRoute();
+setInterval(tickHeader,1000);
+let lastSeg=currentSeg(),lastDay=todayKey();
+setInterval(()=>{if(currentSeg()!==lastSeg||todayKey()!==lastDay){lastSeg=currentSeg();if(todayKey()!==lastDay&&viewKey===lastDay)viewKey=todayKey();lastDay=todayKey()}if(!$("#modalBack")&&!document.activeElement.matches("input,textarea,select"))render()},60000);
+connectDb();
+})();
+</script>
+
+</body></html>
